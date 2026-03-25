@@ -21,12 +21,12 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 
 ### Controllers
 - `ErrorLogsController` — public index (ILIKE search) + show (slug lookup)
-- `SessionsController` — email/password login, logout, `sso_continue` (one-click cross-app login)
+- `SessionsController` — email/password login, logout, `sso_login` (GET one-click SSO), `sso_continue` (POST from button)
 - `OmniauthCallbacksController` — Google OAuth callback + failure (overridden in Turf Monster for merge support)
 - `RegistrationsController` — signup with configurable params via `Studio.registration_params`
 
 ### Concern
-- `Studio::ErrorHandling` — `current_user`, `logged_in?`, `require_authentication`, `set_app_session`, `clear_app_session`, `sso_user_available?`, `sso_display_name`, `sso_source_app`, `rescue_and_log`, `create_error_log`, `handle_not_found`, `handle_unexpected_error`
+- `Studio::ErrorHandling` — `current_user`, `logged_in?`, `require_authentication`, `set_app_session`, `clear_app_session`, `sso_user_available?`, `sso_display_name`, `sso_source_app`, `sso_hub_logo`, `rescue_and_log`, `create_error_log`, `handle_not_found`, `handle_unexpected_error`
 
 ### Models
 - `ErrorLog` — polymorphic target/parent, `capture!(exception)`, cleaned backtrace
@@ -42,46 +42,81 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 ## Configuration
 
 ```ruby
-# config/initializers/studio.rb
+# config/initializers/studio.rb (hub app — McRitchie Studio)
 Studio.configure do |config|
-  config.app_name = "My App"
-  config.session_key = :my_app_user_id       # per-app session key (default: :user_id)
+  config.app_name = "McRitchie Studio"
+  config.session_key = :studio_user_id
+  config.sso_logo = "/studio-logo.svg"        # logo shown on satellite app SSO buttons
   config.welcome_message = ->(user) { "Welcome, #{user.display_name}!" }
   config.registration_params = [:name, :email, :password, :password_confirmation]
-  config.configure_new_user = ->(user) { }   # e.g. user.balance_cents = 0
-  config.configure_sso_user = ->(user) { }   # set app-specific defaults for cross-app users created via sso_continue
+  config.configure_sso_user = ->(user) { user.role = "viewer" }
+end
+
+# config/initializers/studio.rb (satellite app — Turf Monster)
+Studio.configure do |config|
+  config.app_name = "Turf Monster"
+  config.session_key = :turf_user_id
+  config.configure_sso_user = ->(user) { user.balance_cents = 0 }
 end
 ```
 
-## Independent Per-App Sessions with Cross-App Awareness
+## One-Way SSO: Hub → Satellite
 
-Each app has its own session key (e.g. `:turf_user_id`, `:studio_user_id`) so login/logout is independent. A shared `_studio_session` cookie still spans `*.mcritchie.studio` subdomains, but only `sso_*` awareness fields are shared.
+McRitchie Studio is the central auth hub. Satellite apps (Turf Monster, future apps) receive SSO from Studio — not the other way around. Each app has its own session key so login/logout is independent.
+
+### Architecture
+
+- **Hub app** (McRitchie Studio): Sets `sso_*` awareness fields in the shared session on login. Has a nav link to each satellite app's `/sso_login` for one-click SSO. Does NOT show "Continue as" on its own login page.
+- **Satellite apps** (Turf Monster): Show "Continue as [name]" button on login page when hub session data exists. The button and branding come from the engine's `_sso_continue.html.erb` partial — no local override needed.
+- **Shared cookie**: `_studio_session` spans `*.mcritchie.studio`. Each app reads/writes its own session key + shared `sso_*` fields.
 
 ### Session Methods
 
-- **`set_app_session(user)`** — sets `session[Studio.session_key]` (app-specific) + `sso_*` fields (shared awareness: `sso_email`, `sso_name`, `sso_provider`, `sso_uid`, `sso_wallet`, `sso_source`). Called by all auth controllers on login/signup.
-- **`set_sso_session(user)`** — alias for `set_app_session` (backwards compatibility, prefer `set_app_session` in new code)
-- **`clear_app_session`** — deletes only this app's session key, preserves `sso_*` fields so the other app can show "Continue as" button
-- **`current_user`** — looks up `session[Studio.session_key]`. Includes legacy migration: if `session[:user_id]` exists and `session_key != :user_id`, auto-migrates to new key.
+- **`set_app_session(user)`** — sets `session[Studio.session_key]` (app-specific). Only updates `sso_*` fields if this app is the source (prevents overwriting hub data when satellite logs in).
+- **`set_sso_session(user)`** — alias for `set_app_session` (backwards compatibility)
+- **`clear_app_session`** — deletes this app's session key. Clears `sso_*` fields only if this app is the source.
+- **`current_user`** — looks up `session[Studio.session_key]`. Includes legacy migration for old `session[:user_id]` cookies.
 
-### Cross-App "Continue As" Flow
+### SSO Fields (stored in session by hub app)
+
+`sso_email`, `sso_name`, `sso_provider`, `sso_uid`, `sso_wallet`, `sso_source`, `sso_logo`
+
+### SSO Routes & Actions
+
+- **`GET /sso_login`** — one-click SSO entry point. Linked from hub app nav. Auto-logs in from `sso_*` data, redirects to login if unavailable.
+- **`POST /sso_continue`** — form-based SSO from the "Continue as" button on login page.
+
+### View Helpers
 
 - **`sso_user_available?`** — true when not logged in, `sso_email` present, and `sso_source` is a different app
 - **`sso_display_name`** — name or email prefix from sso fields
-- **`sso_source_app`** — which app the user is logged into
-- **`sso_continue` action** — POST endpoint that finds/creates a local user from `sso_*` session data, logs them in. No auto-provisioning — user must click the button.
-- **`_sso_continue.html.erb` partial** — renders "Continue as [name] (from [app])" button + divider. Apps render this at top of their login views.
+- **`sso_source_app`** — which app set the sso data
+- **`sso_hub_logo`** — logo path from `session[:sso_logo]` (set via `Studio.sso_logo` config)
+
+### SSO Button Partial
+
+`sessions/_sso_continue.html.erb` — engine-provided, renders centered "Continue as [name]" button with hub logo (from `sso_hub_logo`). Styled to match Google/Wallet sign-in buttons. Satellite apps just add `<%= render "sessions/sso_continue" %>` to their login view — no local partial needed.
 
 ### Key Design Decisions
 
-- **No auto-provisioning** — removed `create_sso_user`. Cross-app login is now explicit (user clicks "Continue as" button).
-- **Independent logout** — `clear_app_session` only removes this app's key. Logging out of one app does not affect the other.
-- **Wallet-only guard** — users with no email have no `sso_email`, so "Continue as" never appears for them.
-- **Legacy migration** — old `session[:user_id]` cookies auto-migrate to new per-app key on first visit. Can be removed after ~2 weeks.
+- **One-way flow** — Studio is the hub, satellite apps are targets. Studio's login page has no "Continue as" button.
+- **No auto-provisioning** — removed `create_sso_user`. Cross-app login requires explicit user action (clicking "Continue as" or the nav link).
+- **Independent logout** — `clear_app_session` only removes this app's key. Logging out of a satellite doesn't affect the hub.
+- **sso_source preservation** — `set_app_session` doesn't overwrite `sso_*` fields if another app set them. `clear_app_session` only clears them if this app is the source.
+- **Wallet-only guard** — users with no email have no `sso_email`, so "Continue as" never appears.
+- **Logo via config** — hub sets `config.sso_logo`, stored in `session[:sso_logo]`, rendered by engine partial. Satellite apps need the logo file in their `public/` folder.
+
+### Adding a New Satellite App
+
+1. Set `config.session_key` to a unique symbol
+2. Set `config.configure_sso_user` for app-specific defaults
+3. Add `<%= render "sessions/sso_continue" %>` to login view
+4. Copy hub's logo to `public/` (e.g. `public/studio-logo.svg`)
+5. Add the app as a nav link in the hub
 
 ### Requirements
-- Both apps must share `SECRET_KEY_BASE` and use identical `session_store.rb` config
-- Each app must set `config.session_key` to a unique symbol in its initializer
+- All apps share `SECRET_KEY_BASE` and identical `session_store.rb` config
+- Each app sets a unique `config.session_key`
 
 ## When to Add Code Here vs in the App
 
