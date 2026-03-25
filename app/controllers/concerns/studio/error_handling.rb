@@ -35,20 +35,33 @@ module Studio
       # App-specific session (only this app reads this key)
       session[Studio.session_key] = user.id
 
-      # Shared awareness fields (other app reads these for "Continue as" button)
-      session[:sso_email]    = user.email
-      session[:sso_name]     = user.try(:name)
-      session[:sso_provider] = user.provider
-      session[:sso_uid]      = user.uid
-      session[:sso_wallet]   = user.try(:wallet_address)
-      session[:sso_source]   = Studio.app_name
+      # Only update shared awareness fields if this app is the source
+      # (don't overwrite the other app's sso_source when logging in via sso_continue)
+      if session[:sso_source].blank? || session[:sso_source] == Studio.app_name
+        session[:sso_email]    = user.email
+        session[:sso_name]     = user.try(:name)
+        session[:sso_provider] = user.provider
+        session[:sso_uid]      = user.uid
+        session[:sso_wallet]   = user.try(:wallet_address)
+        session[:sso_source]   = Studio.app_name
+      end
     end
 
     alias_method :set_sso_session, :set_app_session
 
     def clear_app_session
       session.delete(Studio.session_key)
-      # Don't clear sso_* fields — other app may still need them
+
+      # Clear sso_* fields only if this app is the source
+      # (preserve them if the other app set them — they're still logged in there)
+      if session[:sso_source] == Studio.app_name
+        session.delete(:sso_email)
+        session.delete(:sso_name)
+        session.delete(:sso_provider)
+        session.delete(:sso_uid)
+        session.delete(:sso_wallet)
+        session.delete(:sso_source)
+      end
     end
 
     # Cross-app awareness helpers for login page
