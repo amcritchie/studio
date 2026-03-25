@@ -1,0 +1,14 @@
+<%# locals: (record:, label: "JSON", collapsible: false) %>
+<% if collapsible %>
+  <details class="mt-8">
+    <summary class="label-upper cursor-pointer"><%= label %></summary>
+    <div class="json-debug mt-2">
+      <pre class="text-mint font-mono text-xs whitespace-pre-wrap"><%= JSON.pretty_generate(record.respond_to?(:as_json) ? record.as_json : record) %></pre>
+    </div>
+  </details>
+<% else %>
+  <div class="json-debug">
+    <p class="label-upper mb-2"><%= label %></p>
+    <pre class="text-mint font-mono text-xs whitespace-pre-wrap"><%= JSON.pretty_generate(record.respond_to?(:as_json) ? record.as_json : record) %></pre>
+  </div>
+<% end %>

@@ -45,18 +45,15 @@
   <!-- Results -->
   <div x-show="!loading">
     <% if @error_logs.empty? %>
-      <div class="bg-navy-400 rounded-xl border border-navy-300/20 p-8 text-center">
-        <% if params[:q].present? %>
-          <p class="text-gray-400 text-lg">No errors matching "<%= params[:q] %>"</p>
-        <% else %>
-          <p class="text-gray-400 text-lg">No errors logged yet.</p>
-          <p class="text-gray-600 text-sm mt-1">Errors will appear here when captured via ErrorLog.capture!</p>
-        <% end %>
-      </div>
+      <% if params[:q].present? %>
+        <%= render "components/empty_state", message: "No errors matching \"#{params[:q]}\"" %>
+      <% else %>
+        <%= render "components/empty_state", message: "No errors logged yet.", detail: "Errors will appear here when captured via ErrorLog.capture!" %>
+      <% end %>
     <% else %>
       <div class="space-y-2">
         <% @error_logs.each do |log| %>
-          <%= link_to error_log_path(log, q: params[:q].presence), class: "block bg-navy-400 rounded-xl border border-navy-300/20 p-4 hover:border-red-700/50 hover:shadow-lg hover:shadow-red-900/10 transition" do %>
+          <%= link_to error_log_path(log, q: params[:q].presence), class: "block card p-4 hover:border-red-700/50 hover:shadow-lg hover:shadow-red-900/10 transition" do %>
             <div class="flex items-start justify-between gap-4">
               <div class="flex-1 min-w-0">
                 <p class="text-red-400 font-semibold text-sm truncate"><%= log.message %></p>
@@ -66,9 +63,7 @@
               </div>
               <div class="flex items-center gap-3 shrink-0">
                 <% if log.target_name.present? %>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-violet-900/30 border border-violet-700/50 rounded text-xs text-violet-300">
-                    <span class="text-violet-400 font-mono"><%= log.target_name %></span>
-                  </span>
+                  <%= render "components/badge", text: log.target_name, scheme: "violet" %>
                 <% end %>
                 <span class="text-xs text-gray-600 whitespace-nowrap"><%= time_ago_in_words(log.created_at) %> ago</span>
               </div>
