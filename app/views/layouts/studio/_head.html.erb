@@ -14,4 +14,10 @@
 
 <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
 <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+<%= action_cable_meta_tag %>
 <%= javascript_importmap_tags %>
+<% if logged_in? %>
+<script type="module">
+  import "studio_session_channel"
+</script>
+<% end %>

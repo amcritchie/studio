@@ -16,6 +16,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
+    SessionChannel.broadcast_to(current_user, { type: "logout" }) if current_user
     reset_session
     redirect_to login_path, notice: "Logged out."
   end
