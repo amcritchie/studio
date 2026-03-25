@@ -18,6 +18,7 @@ module Studio
       get  "login",  to: "sessions#new"
       post "login",  to: "sessions#create"
       post "sso_continue", to: "sessions#sso_continue"
+      get  "sso_login",    to: "sessions#sso_login"
       get  "logout", to: "sessions#destroy"
       get  "signup", to: "registrations#new"
       post "signup", to: "registrations#create"
