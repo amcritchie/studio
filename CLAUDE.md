@@ -4,6 +4,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 
 - **GitHub**: https://github.com/amcritchie/studio
 - **Gem name**: `studio` (hosted on GitHub, not RubyGems — name "studio" is taken there)
+- **Version**: 0.2.3
 - **Consumed by**: McRitchie Studio (`mcritchie_studio/`) and Turf Monster (`turf_monster/`)
 
 ## Architecture
@@ -21,7 +22,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 ### Controllers
 - `ErrorLogsController` — public index (ILIKE search) + show (slug lookup)
 - `SessionsController` — email/password login, logout
-- `OmniauthCallbacksController` — Google OAuth callback + failure
+- `OmniauthCallbacksController` — Google OAuth callback + failure (overridden in Turf Monster for merge support)
 - `RegistrationsController` — signup with configurable params via `Studio.registration_params`
 
 ### Concern
@@ -54,11 +55,12 @@ end
 
 The engine provides SSO across `*.mcritchie.studio` subdomains via a shared `_studio_session` cookie.
 
-- **`set_sso_session(user)`** — stores `user_id`, `user_email`, `user_name`, `user_provider`, `user_uid` in session. Called by all auth controllers on login/signup.
+- **`set_sso_session(user)`** — stores `user_id`, `user_email`, `user_name`, `user_provider`, `user_uid`, `wallet_address` in session. Called by all auth controllers on login/signup.
 - **`current_user`** — tries `user_id` first (fast path), falls back to `user_email` lookup, auto-provisions via `create_sso_user` if no local user exists.
-- **`create_sso_user`** — builds a User from session data with random password, calls `Studio.configure_sso_user` for app-specific defaults (e.g. `balance_cents = 0` in Turf, `role = "viewer"` in Studio).
+- **`create_sso_user`** — returns nil early if `user_email` is blank (wallet-only users can't SSO cross-app). Otherwise builds a User from session data with random password, calls `Studio.configure_sso_user` for app-specific defaults.
 - **Logout** — `reset_session` clears the shared cookie, logging out across all apps.
 - **Requirements**: Both apps must share `SECRET_KEY_BASE` and use identical `session_store.rb` config.
+- **Wallet-only users**: Cannot SSO cross-app because email is the sync key. Once they add an email, SSO works.
 
 ## When to Add Code Here vs in the App
 
@@ -71,8 +73,9 @@ The engine provides SSO across `*.mcritchie.studio` subdomains via a shared `_st
 - It's app-specific business logic (tasks, contests, picks)
 - The view has app-specific branding (login/signup pages)
 - It's a model that only exists in one app
+- It's app-specific auth logic (wallet auth, account merging — Turf Monster only)
 
-**Override pattern:** To customize an engine view, create the same file path in the app. Rails loads app views before engine views.
+**Override pattern:** To customize an engine view or controller, create the same file path in the app. Rails loads app files before engine files.
 
 ## Updating the Engine
 
