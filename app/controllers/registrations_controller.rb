@@ -10,7 +10,7 @@ class RegistrationsController < ApplicationController
     Studio.configure_new_user.call(@user)
     rescue_and_log(target: @user) do
       @user.save!
-      session[:user_id] = @user.id
+      set_sso_session(@user)
       redirect_to root_path, notice: Studio.welcome_message.call(@user)
     end
   rescue StandardError => e

@@ -6,6 +6,7 @@ module Studio
   mattr_accessor :welcome_message,     default: ->(user) { "Welcome, #{user.display_name}!" }
   mattr_accessor :registration_params, default: [:name, :email, :password, :password_confirmation]
   mattr_accessor :configure_new_user,  default: ->(user) {}
+  mattr_accessor :configure_sso_user,  default: ->(user) {}
 
   def self.configure
     yield self

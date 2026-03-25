@@ -14,7 +14,42 @@ module Studio
     private
 
     def current_user
-      @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]
+      return @current_user if defined?(@current_user)
+
+      # Try local user_id first (fast path)
+      @current_user = User.find_by(id: session[:user_id]) if session[:user_id]
+
+      # Fall back to SSO email lookup (cross-app login)
+      if @current_user.nil? && session[:user_email].present?
+        @current_user = User.find_by(email: session[:user_email]) || create_sso_user
+        session[:user_id] = @current_user.id if @current_user
+      end
+
+      @current_user
+    end
+
+    def set_sso_session(user)
+      session[:user_id]       = user.id
+      session[:user_email]    = user.email
+      session[:user_name]     = user.name
+      session[:user_provider] = user.provider
+      session[:user_uid]      = user.uid
+    end
+
+    def create_sso_user
+      user = User.new(
+        email:    session[:user_email],
+        name:     session[:user_name],
+        provider: session[:user_provider],
+        uid:      session[:user_uid],
+        password: SecureRandom.hex(16)
+      )
+      Studio.configure_sso_user.call(user)
+      user.save!
+      user
+    rescue StandardError => e
+      Rails.logger.error("SSO user creation failed: #{e.message}")
+      nil
     end
 
     def logged_in?

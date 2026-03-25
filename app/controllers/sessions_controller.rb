@@ -7,7 +7,7 @@ class SessionsController < ApplicationController
   def create
     user = User.find_by(email: params[:email])
     if user&.authenticate(params[:password])
-      session[:user_id] = user.id
+      set_sso_session(user)
       redirect_to root_path, notice: "Welcome back, #{user.display_name}!"
     else
       flash.now[:alert] = "Invalid email or password."
@@ -16,7 +16,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    session.delete(:user_id)
+    reset_session
     redirect_to login_path, notice: "Logged out."
   end
 end
