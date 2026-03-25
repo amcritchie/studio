@@ -8,6 +8,7 @@ module Studio
   mattr_accessor :registration_params, default: [:name, :email, :password, :password_confirmation]
   mattr_accessor :configure_new_user,  default: ->(user) {}
   mattr_accessor :configure_sso_user,  default: ->(user) {}
+  mattr_accessor :sso_logo,            default: nil
 
   def self.configure
     yield self

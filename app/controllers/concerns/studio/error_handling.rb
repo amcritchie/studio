@@ -8,7 +8,7 @@ module Studio
 
       before_action :require_authentication
 
-      helper_method :current_user, :logged_in?, :sso_user_available?, :sso_display_name, :sso_source_app
+      helper_method :current_user, :logged_in?, :sso_user_available?, :sso_display_name, :sso_source_app, :sso_hub_logo
     end
 
     private
@@ -44,6 +44,7 @@ module Studio
         session[:sso_uid]      = user.uid
         session[:sso_wallet]   = user.try(:wallet_address)
         session[:sso_source]   = Studio.app_name
+        session[:sso_logo]     = Studio.sso_logo
       end
     end
 
@@ -61,6 +62,7 @@ module Studio
         session.delete(:sso_uid)
         session.delete(:sso_wallet)
         session.delete(:sso_source)
+        session.delete(:sso_logo)
       end
     end
 
@@ -75,6 +77,10 @@ module Studio
 
     def sso_source_app
       session[:sso_source]
+    end
+
+    def sso_hub_logo
+      session[:sso_logo]
     end
 
     def logged_in?
