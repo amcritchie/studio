@@ -34,9 +34,12 @@ module Studio
       session[:user_name]     = user.name
       session[:user_provider] = user.provider
       session[:user_uid]      = user.uid
+      session[:wallet_address] = user.try(:wallet_address)
     end
 
     def create_sso_user
+      return nil if session[:user_email].blank?
+
       user = User.new(
         email:    session[:user_email],
         name:     session[:user_name],
