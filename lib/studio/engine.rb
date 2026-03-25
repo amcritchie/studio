@@ -6,6 +6,7 @@ module Studio
 
     initializer "studio.assets" do |app|
       app.config.assets.paths << root.join("app/assets/javascripts")
+      app.config.assets.precompile += %w[studio/session_channel.js]
     end
   end
 end
