@@ -25,7 +25,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `RegistrationsController` — signup with configurable params via `Studio.registration_params`
 
 ### Concern
-- `Studio::ErrorHandling` — `current_user`, `logged_in?`, `require_authentication`, `rescue_and_log`, `create_error_log`, `handle_not_found`, `handle_unexpected_error`
+- `Studio::ErrorHandling` — `current_user`, `logged_in?`, `require_authentication`, `set_sso_session`, `create_sso_user`, `rescue_and_log`, `create_error_log`, `handle_not_found`, `handle_unexpected_error`
 
 ### Models
 - `ErrorLog` — polymorphic target/parent, `capture!(exception)`, cleaned backtrace
@@ -46,8 +46,19 @@ Studio.configure do |config|
   config.welcome_message = ->(user) { "Welcome, #{user.display_name}!" }
   config.registration_params = [:name, :email, :password, :password_confirmation]
   config.configure_new_user = ->(user) { }  # e.g. user.balance_cents = 0
+  config.configure_sso_user = ->(user) { }  # set app-specific defaults for cross-app auto-provisioned users
 end
 ```
+
+## Cross-App SSO
+
+The engine provides SSO across `*.mcritchie.studio` subdomains via a shared `_studio_session` cookie.
+
+- **`set_sso_session(user)`** — stores `user_id`, `user_email`, `user_name`, `user_provider`, `user_uid` in session. Called by all auth controllers on login/signup.
+- **`current_user`** — tries `user_id` first (fast path), falls back to `user_email` lookup, auto-provisions via `create_sso_user` if no local user exists.
+- **`create_sso_user`** — builds a User from session data with random password, calls `Studio.configure_sso_user` for app-specific defaults (e.g. `balance_cents = 0` in Turf, `role = "viewer"` in Studio).
+- **Logout** — `reset_session` clears the shared cookie, logging out across all apps.
+- **Requirements**: Both apps must share `SECRET_KEY_BASE` and use identical `session_store.rb` config.
 
 ## When to Add Code Here vs in the App
 
