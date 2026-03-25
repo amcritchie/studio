@@ -8,7 +8,7 @@ module Studio
 
       before_action :require_authentication
 
-      helper_method :current_user, :logged_in?
+      helper_method :current_user, :logged_in?, :sso_user_available?, :sso_display_name, :sso_source_app
     end
 
     private
@@ -16,43 +16,52 @@ module Studio
     def current_user
       return @current_user if defined?(@current_user)
 
-      # Try local user_id first (fast path)
-      @current_user = User.find_by(id: session[:user_id]) if session[:user_id]
+      # Try app-specific session key
+      @current_user = User.find_by(id: session[Studio.session_key])
 
-      # Fall back to SSO email lookup (cross-app login)
-      if @current_user.nil? && session[:user_email].present?
-        @current_user = User.find_by(email: session[:user_email]) || create_sso_user
-        session[:user_id] = @current_user.id if @current_user
+      # Legacy migration: old shared session[:user_id]
+      if @current_user.nil? && session[:user_id].present? && Studio.session_key != :user_id
+        @current_user = User.find_by(id: session[:user_id])
+        if @current_user
+          set_app_session(@current_user)  # Migrate to new key
+          session.delete(:user_id)        # Clean up old key
+        end
       end
 
       @current_user
     end
 
-    def set_sso_session(user)
-      session[:user_id]       = user.id
-      session[:user_email]    = user.email
-      session[:user_name]     = user.name
-      session[:user_provider] = user.provider
-      session[:user_uid]      = user.uid
-      session[:wallet_address] = user.try(:wallet_address)
+    def set_app_session(user)
+      # App-specific session (only this app reads this key)
+      session[Studio.session_key] = user.id
+
+      # Shared awareness fields (other app reads these for "Continue as" button)
+      session[:sso_email]    = user.email
+      session[:sso_name]     = user.try(:name)
+      session[:sso_provider] = user.provider
+      session[:sso_uid]      = user.uid
+      session[:sso_wallet]   = user.try(:wallet_address)
+      session[:sso_source]   = Studio.app_name
     end
 
-    def create_sso_user
-      return nil if session[:user_email].blank?
+    alias_method :set_sso_session, :set_app_session
 
-      user = User.new(
-        email:    session[:user_email],
-        name:     session[:user_name],
-        provider: session[:user_provider],
-        uid:      session[:user_uid],
-        password: SecureRandom.hex(16)
-      )
-      Studio.configure_sso_user.call(user)
-      user.save!
-      user
-    rescue StandardError => e
-      Rails.logger.error("SSO user creation failed: #{e.message}")
-      nil
+    def clear_app_session
+      session.delete(Studio.session_key)
+      # Don't clear sso_* fields — other app may still need them
+    end
+
+    # Cross-app awareness helpers for login page
+    def sso_user_available?
+      !logged_in? && session[:sso_email].present? && session[:sso_source] != Studio.app_name
+    end
+
+    def sso_display_name
+      session[:sso_name].presence || session[:sso_email]&.split("@")&.first&.capitalize || "User"
+    end
+
+    def sso_source_app
+      session[:sso_source]
     end
 
     def logged_in?

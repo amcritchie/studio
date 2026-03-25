@@ -4,7 +4,7 @@ class OmniauthCallbacksController < ApplicationController
   def create
     user = User.from_omniauth(request.env["omniauth.auth"])
     rescue_and_log(target: user) do
-      set_sso_session(user)
+      set_app_session(user)
       redirect_to root_path, notice: "Signed in with Google!"
     end
   rescue StandardError => e
