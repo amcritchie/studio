@@ -39,6 +39,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `sessions/_sso_continue.html.erb` — "Continue as" button partial for cross-app awareness
 - `registrations/new.html.erb` — generic signup, conditional name field based on config
 - `components/_theme_toggle.html.erb` — sun/moon toggle button for dark/light mode
+- `components/_admin_dropdown.html.erb` — gear icon dropdown (Alpine.js) with links to Theme styleguide (`/admin/theme`) and Error Logs (`/error_logs`). Used in both apps' navbars.
 
 ### Theme System (Shared Tailwind Config)
 
