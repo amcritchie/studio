@@ -1,11 +1,11 @@
 <div class="min-h-[70vh] flex items-center justify-center">
   <div class="w-full max-w-md">
     <div class="text-center mb-8">
-      <h1 class="text-3xl font-extrabold text-white tracking-tight"><%= Studio.app_name %></h1>
-      <p class="text-gray-400 mt-2">Create your account</p>
+      <h1 class="text-3xl font-extrabold text-heading tracking-tight"><%= Studio.app_name %></h1>
+      <p class="text-secondary mt-2">Create your account</p>
     </div>
 
-    <div class="bg-navy-400 rounded-xl shadow p-8 border border-navy-300/20">
+    <div class="card p-8 shadow">
       <% if @user.errors.any? %>
         <div class="mb-4 p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-300 text-sm">
           <% @user.errors.full_messages.each do |msg| %>
@@ -17,31 +17,31 @@
       <%= form_with model: @user, url: signup_path, method: :post do |f| %>
         <% if Studio.registration_params.include?(:name) %>
           <div class="mb-5">
-            <label for="user_name" class="block text-sm text-gray-400 mb-2 font-medium">Name</label>
+            <label for="user_name" class="block text-sm text-secondary mb-2 font-medium">Name</label>
             <%= f.text_field :name, id: "user_name", autofocus: true,
-              class: "w-full bg-navy-600 border border-navy-300/30 rounded-lg px-4 py-3 text-white focus:border-violet focus:outline-none",
+              class: "input-field",
               placeholder: "Your name" %>
           </div>
         <% end %>
 
         <div class="mb-5">
-          <label for="user_email" class="block text-sm text-gray-400 mb-2 font-medium">Email</label>
+          <label for="user_email" class="block text-sm text-secondary mb-2 font-medium">Email</label>
           <%= f.email_field :email, id: "user_email", autofocus: !Studio.registration_params.include?(:name),
-            class: "w-full bg-navy-600 border border-navy-300/30 rounded-lg px-4 py-3 text-white focus:border-violet focus:outline-none",
+            class: "input-field",
             placeholder: "you@example.com" %>
         </div>
 
         <div class="mb-5">
-          <label for="user_password" class="block text-sm text-gray-400 mb-2 font-medium">Password</label>
+          <label for="user_password" class="block text-sm text-secondary mb-2 font-medium">Password</label>
           <%= f.password_field :password, id: "user_password",
-            class: "w-full bg-navy-600 border border-navy-300/30 rounded-lg px-4 py-3 text-white focus:border-violet focus:outline-none",
+            class: "input-field",
             placeholder: "Choose a password" %>
         </div>
 
         <div class="mb-6">
-          <label for="user_password_confirmation" class="block text-sm text-gray-400 mb-2 font-medium">Confirm Password</label>
+          <label for="user_password_confirmation" class="block text-sm text-secondary mb-2 font-medium">Confirm Password</label>
           <%= f.password_field :password_confirmation, id: "user_password_confirmation",
-            class: "w-full bg-navy-600 border border-navy-300/30 rounded-lg px-4 py-3 text-white focus:border-violet focus:outline-none",
+            class: "input-field",
             placeholder: "Confirm your password" %>
         </div>
 
@@ -51,8 +51,8 @@
       <% end %>
 
       <div class="relative my-6">
-        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-navy-300/30"></div></div>
-        <div class="relative flex justify-center text-sm"><span class="bg-navy-400 px-3 text-gray-400">or</span></div>
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-subtle"></div></div>
+        <div class="relative flex justify-center text-sm"><span class="bg-surface px-3 text-secondary">or</span></div>
       </div>
 
       <%= button_to "/auth/google_oauth2", method: :post, data: { turbo: false },
@@ -61,7 +61,7 @@
         Sign up with Google
       <% end %>
 
-      <p class="text-center text-gray-400 text-sm mt-6">
+      <p class="text-center text-secondary text-sm mt-6">
         Already have an account?
         <%= link_to "Log in", login_path, class: "text-violet hover:text-violet-300 font-medium underline underline-offset-2" %>
       </p>

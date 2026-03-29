@@ -10,6 +10,12 @@ module.exports = {
     },
     extend: {
       colors: {
+        // Theme-aware semantic tokens (reference CSS variables)
+        page:          'var(--color-page)',
+        surface:       'var(--color-surface)',
+        'surface-alt': 'var(--color-surface-alt)',
+        inset:         'var(--color-inset)',
+
         mint: {
           DEFAULT: '#06D6A0',
           50: '#e6faf4',
@@ -57,6 +63,16 @@ module.exports = {
         ember: '#FF8C69',
         gold: '#FFD166',
         magenta: '#F72585',
+      },
+      textColor: {
+        heading:   'var(--color-text)',
+        body:      'var(--color-text-body)',
+        secondary: 'var(--color-text-secondary)',
+        muted:     'var(--color-text-muted)',
+      },
+      borderColor: {
+        subtle: 'var(--color-border)',
+        strong: 'var(--color-border-strong)',
       },
     },
   },

@@ -1,7 +1,7 @@
 <%# locals: (form:, field:, label: nil, type: "text", placeholder: nil, rows: nil) %>
 <div class="mb-5">
   <% if label.present? %>
-    <label class="block text-sm text-gray-400 mb-2 font-medium"><%= label %></label>
+    <label class="block text-sm text-secondary mb-2 font-medium"><%= label %></label>
   <% end %>
   <% if type.to_s == "textarea" %>
     <%= form.text_area field, rows: rows || 4, class: "input-field", placeholder: placeholder %>

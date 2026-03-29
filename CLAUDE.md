@@ -38,6 +38,19 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `sessions/new.html.erb` — generic login (apps override with branded versions)
 - `sessions/_sso_continue.html.erb` — "Continue as" button partial for cross-app awareness
 - `registrations/new.html.erb` — generic signup, conditional name field based on config
+- `components/_theme_toggle.html.erb` — sun/moon toggle button for dark/light mode
+
+### Theme System (Shared Tailwind Config)
+
+The engine's `studio.tailwind.config.js` defines semantic color tokens that map to CSS custom properties. Each app sets `--color-*` variables in its `application.tailwind.css` for dark and light themes.
+
+**Tokens defined in config**: `page`, `surface`, `surface-alt`, `inset` (colors); `heading`, `body`, `secondary`, `muted` (textColor); `subtle`, `strong` (borderColor).
+
+**FOUC prevention**: `_head.html.erb` includes a synchronous `<script>` that sets `class="dark"` from `localStorage.getItem('theme')` before any paint. Alpine theme store initialized on `alpine:init`.
+
+**Views use semantic classes**: `bg-page`, `bg-surface`, `text-heading`, `text-body`, `border-subtle`, etc. Brand colors (`text-violet`, `bg-mint`) are static and don't use tokens.
+
+See top-level `CLAUDE.md` for the full token reference table.
 
 ## Configuration
 
