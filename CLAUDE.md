@@ -41,8 +41,8 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `sessions/_sso_continue.html.erb` — "Continue as" button partial for cross-app awareness
 - `registrations/new.html.erb` — generic signup, conditional name field based on config
 - `components/_theme_toggle.html.erb` — sun/moon toggle button for dark/light mode
-- `components/_admin_dropdown.html.erb` — gear icon dropdown (Alpine.js) with links to Theme Editor (`/admin/theme/edit`), Styleguide (`/admin/theme`), and Error Logs (`/error_logs`). Used in both apps' navbars.
-- `theme_settings/edit.html.erb` — admin theme editor with 7 color pickers, live preview (dark/light), save + regenerate cache buttons
+- `components/_admin_dropdown.html.erb` — gear icon dropdown (Alpine.js) with links to Theme (`/admin/theme`) and Error Logs (`/error_logs`). Used in both apps' navbars.
+- `theme_settings/edit.html.erb` — combined theme page: color editor (7 pickers + live dark/light preview) at top, styleguide sections below (logos via `theme_logos` config, semantic tokens, typography, buttons, components)
 
 ### Helpers
 - `StudioThemeHelper` — `studio_theme_css_tag` method: loads colors from `ThemeSetting.current` (DB) → falls back to `Studio.theme_config` → runs through `Studio::ThemeResolver` → renders as `<style>` tag. Cached via `Rails.cache` (1-hour TTL).
@@ -66,7 +66,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 **Dynamic primary palette**: `primary_palette_vars` generates `--color-primary-{50..900}` shade scale + `--color-primary-{shade}-rgb` (space-separated RGB) for Tailwind `<alpha-value>` opacity support. Shared Tailwind config maps `primary-*` utilities to these CSS vars.
 
 **Config**: `Studio.theme_*` accessors with defaults (violet primary). Apps override in `config/initializers/studio.rb`.
-**DB override**: `ThemeSetting` model — nullable columns fall back to config defaults. Admin editor at `/admin/theme/edit`.
+**DB override**: `ThemeSetting` model — nullable columns fall back to config defaults. Admin theme page at `/admin/theme`.
 **Cache**: `Rails.cache.fetch("studio/theme/#{Studio.app_name}")` with 1-hour TTL. Regenerate button clears cache.
 **Migration**: Each app creates `theme_settings` table manually (consistent with `create_error_logs` pattern).
 
@@ -89,6 +89,7 @@ Studio.configure do |config|
   config.welcome_message = ->(user) { "Welcome, #{user.display_name}!" }
   config.registration_params = [:name, :email, :password, :password_confirmation]
   config.configure_sso_user = ->(user) { user.role = "viewer" }
+  config.theme_logos = %w[logo-icon.svg icon.svg icon.png studio-logo.svg favicon.png]
   # Theme uses defaults (violet primary) — no theme_* config needed
 end
 
@@ -97,6 +98,7 @@ Studio.configure do |config|
   config.app_name = "Turf Monster"
   config.session_key = :turf_user_id
   config.configure_sso_user = ->(user) { user.balance_cents = 0 }
+  config.theme_logos = %w[logo.png logo.jpeg icon.svg icon.png favicon.png]
   config.theme_primary = "#4BAF50"  # green
   config.theme_accent = "#8E82FE"   # violet
 end
@@ -112,10 +114,11 @@ end
 | `theme_danger` | `#EF4444` | Destructive actions |
 | `theme_dark` | `#1A1535` | Dark mode base |
 | `theme_light` | `#f8fafc` | Light mode base |
+| `theme_logos` | `[]` | Array of logo filenames from `public/` for styleguide |
 
 ### Theme Routes
-- `GET /admin/theme/edit` → `theme_settings#edit` (admin-only theme editor)
-- `PATCH /admin/theme/update` → `theme_settings#update` (save theme colors)
+- `GET /admin/theme` → `theme_settings#edit` (admin-only theme editor + styleguide)
+- `PATCH /admin/theme` → `theme_settings#update` (save theme colors)
 - `POST /admin/theme/regenerate` → `theme_settings#regenerate` (clear cache)
 
 ## One-Way SSO: Hub → Satellite
