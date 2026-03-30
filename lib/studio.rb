@@ -19,7 +19,7 @@ module Studio
   mattr_accessor :theme_success,  default: "#4BAF50"
   mattr_accessor :theme_warning,  default: "#FF7C47"
   mattr_accessor :theme_danger,   default: "#EF4444"
-  mattr_accessor :theme_accent,   default: nil
+  mattr_accessor :theme_accent,   default: "#F72585"
 
   def self.configure
     yield self
