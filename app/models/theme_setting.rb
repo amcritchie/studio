@@ -1,7 +1,7 @@
 class ThemeSetting < ApplicationRecord
   include Sluggable
 
-  ROLES = %i[primary dark light success accent warning danger].freeze
+  ROLES = %i[primary dark light success warning danger accent].freeze
 
   # Map DB columns (accent1/accent2) to role names (success/accent)
   def self.db_column_for(role)

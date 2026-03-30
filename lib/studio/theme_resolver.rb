@@ -1,6 +1,6 @@
 module Studio
   class ThemeResolver
-    ROLES = %i[primary dark light success accent warning danger].freeze
+    ROLES = %i[primary dark light success warning danger accent].freeze
 
     attr_reader :colors
 

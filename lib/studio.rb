@@ -17,9 +17,9 @@ module Studio
   mattr_accessor :theme_dark,     default: "#1A1535"
   mattr_accessor :theme_light,    default: "#f8fafc"
   mattr_accessor :theme_success,  default: "#4BAF50"
-  mattr_accessor :theme_accent,   default: nil
   mattr_accessor :theme_warning,  default: "#FF7C47"
   mattr_accessor :theme_danger,   default: "#EF4444"
+  mattr_accessor :theme_accent,   default: nil
 
   def self.configure
     yield self
@@ -31,9 +31,9 @@ module Studio
       dark:    theme_dark,
       light:   theme_light,
       success: theme_success,
-      accent:  theme_accent,
       warning: theme_warning,
-      danger:  theme_danger
+      danger:  theme_danger,
+      accent:  theme_accent
     }.compact
   end
 
