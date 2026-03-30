@@ -25,23 +25,24 @@ module Studio
     end
 
     def dark_mode_vars
-      dark_scale  = ColorScale.generate(colors[:dark] || "#1A1535")
-      cta_scale   = ColorScale.generate(colors[:primary] || "#8E82FE")
+      dark_base   = colors[:dark] || "#1A1535"
+      primary     = colors[:primary] || "#8E82FE"
+      border_rgb  = ColorScale.lighten(dark_base, 0.30)
 
       {
-        "--color-page"           => colors[:dark] || "#1A1535",
-        "--color-surface"        => dark_scale[400],
-        "--color-surface-alt"    => dark_scale[600],
-        "--color-inset"          => dark_scale[800],
+        "--color-page"           => dark_base,
+        "--color-surface"        => ColorScale.lighten(dark_base, 0.15),
+        "--color-surface-alt"    => ColorScale.darken(dark_base, 0.14),
+        "--color-inset"          => ColorScale.darken(dark_base, 0.43),
         "--color-text"           => "#ffffff",
         "--color-text-body"      => "#e2e8f0",
         "--color-text-secondary" => "#94a3b8",
         "--color-text-muted"     => "#64748b",
-        "--color-border"         => ColorScale.with_opacity(dark_scale[300], 0.2),
-        "--color-border-strong"  => ColorScale.with_opacity(dark_scale[300], 0.4),
+        "--color-border"         => ColorScale.with_opacity(border_rgb, 0.2),
+        "--color-border-strong"  => ColorScale.with_opacity(border_rgb, 0.4),
         "--color-shadow"         => "transparent",
-        "--color-cta"            => colors[:primary] || "#8E82FE",
-        "--color-cta-hover"      => cta_scale[700],
+        "--color-cta"            => primary,
+        "--color-cta-hover"      => ColorScale.darken(primary, 0.30),
         "--color-success"        => colors[:accent1] || "#06D6A0",
         "--color-warning"        => colors[:warning] || "#FF7C47",
         "--color-danger"         => colors[:danger] || "#EF4444"
@@ -49,19 +50,19 @@ module Studio
     end
 
     def light_mode_vars
-      light_scale = ColorScale.generate(colors[:light] || "#f8fafc")
+      light_base = colors[:light] || "#f8fafc"
 
       {
-        "--color-page"           => colors[:light] || "#f8fafc",
+        "--color-page"           => light_base,
         "--color-surface"        => "#ffffff",
-        "--color-surface-alt"    => light_scale[100],
-        "--color-inset"          => light_scale[200],
+        "--color-surface-alt"    => ColorScale.darken(light_base, 0.03),
+        "--color-inset"          => ColorScale.darken(light_base, 0.08),
         "--color-text"           => "#0f172a",
         "--color-text-body"      => "#334155",
         "--color-text-secondary" => "#64748b",
         "--color-text-muted"     => "#94a3b8",
-        "--color-border"         => light_scale[200],
-        "--color-border-strong"  => light_scale[300],
+        "--color-border"         => ColorScale.darken(light_base, 0.08),
+        "--color-border-strong"  => ColorScale.darken(light_base, 0.15),
         "--color-shadow"         => "rgba(0,0,0,0.05)"
       }
     end
