@@ -31,7 +31,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 
 ### Models
 - `ErrorLog` — polymorphic target/parent, `capture!(exception)`, cleaned backtrace
-- `ThemeSetting` — single-row-per-app (keyed by `app_name`), 7 nullable color columns, `resolved_colors` merges DB + config defaults
+- `ThemeSetting` — single-row-per-app (keyed by `app_name`), 7 nullable color columns (DB: `accent1`/`accent2`, mapped to roles `success`/`accent` via `db_column_for`), `resolved_colors` merges DB + config defaults
 - `Sluggable` concern — `before_save :set_slug`, `to_param` returns slug
 
 ### Views
@@ -49,19 +49,21 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 
 ### Lib Modules
 - `Studio::ColorScale` — pure Ruby hex color math: `generate(hex)` returns 50-900 shade scale, `lighten`, `darken`, `hex_to_rgb`, `rgb_to_hex`, `with_opacity`
-- `Studio::ThemeResolver` — takes 7 role colors, derives all ~22 CSS custom properties for dark and light modes. `to_css` returns the full `:root, .dark { ... } html:not(.dark) { ... }` CSS string.
+- `Studio::ThemeResolver` — takes 7 role colors, derives all ~22 CSS custom properties + primary palette (50-900 shades + RGB variants) for dark and light modes. `to_css` returns the full `:root, .dark { ... } html:not(.dark) { ... }` CSS string.
 
 ### Dynamic Theme System
 
 **How it works**: `_head.html.erb` calls `studio_theme_css_tag` which injects a `<style>` tag with all CSS custom properties before the Tailwind stylesheet loads. Tailwind's semantic tokens (`bg-page`, `text-heading`, `border-subtle`) reference these CSS vars.
 
 **7 role colors** → all derived automatically:
-- `primary` → `--color-cta`, `--color-cta-hover`
-- `accent1` → `--color-success`
+- `primary` → `--color-cta`, `--color-cta-hover`, `--color-primary-{50..900}` + `-rgb` variants
+- `success` → `--color-success`
 - `warning` → `--color-warning`
 - `danger` → `--color-danger`
 - `dark` → surface/inset/border colors for dark mode (lighten/darken percentages)
 - `light` → surface/inset/border colors for light mode
+
+**Dynamic primary palette**: `primary_palette_vars` generates `--color-primary-{50..900}` shade scale + `--color-primary-{shade}-rgb` (space-separated RGB) for Tailwind `<alpha-value>` opacity support. Shared Tailwind config maps `primary-*` utilities to these CSS vars.
 
 **Config**: `Studio.theme_*` accessors with defaults (violet primary). Apps override in `config/initializers/studio.rb`.
 **DB override**: `ThemeSetting` model — nullable columns fall back to config defaults. Admin editor at `/admin/theme/edit`.
@@ -96,16 +98,16 @@ Studio.configure do |config|
   config.session_key = :turf_user_id
   config.configure_sso_user = ->(user) { user.balance_cents = 0 }
   config.theme_primary = "#4BAF50"  # green
-  config.theme_accent2 = "#8E82FE"  # violet
+  config.theme_accent = "#8E82FE"   # violet
 end
 ```
 
 ### Theme Config Options
 | Option | Default | Description |
 |--------|---------|-------------|
-| `theme_primary` | `#8E82FE` | CTAs, buttons, links |
-| `theme_accent1` | `#06D6A0` | Success accent |
-| `theme_accent2` | `nil` | Tertiary accent |
+| `theme_primary` | `#8E82FE` | CTAs, buttons, links, primary palette |
+| `theme_success` | `#4BAF50` | Success accent |
+| `theme_accent` | `nil` | Tertiary accent |
 | `theme_warning` | `#FF7C47` | Warning states |
 | `theme_danger` | `#EF4444` | Destructive actions |
 | `theme_dark` | `#1A1535` | Dark mode base |

@@ -14,12 +14,12 @@ module Studio
 
   # Theme role colors (7 roles)
   mattr_accessor :theme_primary,  default: "#8E82FE"
-  mattr_accessor :theme_success,  default: "#06D6A0"
+  mattr_accessor :theme_dark,     default: "#1A1535"
+  mattr_accessor :theme_light,    default: "#f8fafc"
+  mattr_accessor :theme_success,  default: "#4BAF50"
   mattr_accessor :theme_accent,   default: nil
   mattr_accessor :theme_warning,  default: "#FF7C47"
   mattr_accessor :theme_danger,   default: "#EF4444"
-  mattr_accessor :theme_dark,     default: "#1A1535"
-  mattr_accessor :theme_light,    default: "#f8fafc"
 
   def self.configure
     yield self
@@ -28,12 +28,12 @@ module Studio
   def self.theme_config
     {
       primary: theme_primary,
+      dark:    theme_dark,
+      light:   theme_light,
       success: theme_success,
       accent:  theme_accent,
       warning: theme_warning,
-      danger:  theme_danger,
-      dark:    theme_dark,
-      light:   theme_light
+      danger:  theme_danger
     }.compact
   end
 
