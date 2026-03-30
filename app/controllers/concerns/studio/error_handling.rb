@@ -48,8 +48,6 @@ module Studio
       end
     end
 
-    alias_method :set_sso_session, :set_app_session
-
     def clear_app_session
       session.delete(Studio.session_key)
 

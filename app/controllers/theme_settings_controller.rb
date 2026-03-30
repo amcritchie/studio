@@ -13,7 +13,7 @@ class ThemeSettingsController < ApplicationController
     rescue_and_log(target: @theme_setting) do
       @theme_setting.update!(theme_params)
       Rails.cache.delete("studio/theme/#{Studio.app_name}")
-      redirect_to admin_theme_edit_path, notice: "Theme saved."
+      redirect_to admin_theme_path, notice: "Theme saved."
     end
   rescue StandardError => e
     @defaults = Studio.theme_config
@@ -24,7 +24,7 @@ class ThemeSettingsController < ApplicationController
 
   def regenerate
     Rails.cache.delete("studio/theme/#{Studio.app_name}")
-    redirect_to admin_theme_edit_path, notice: "Theme cache cleared."
+    redirect_to admin_theme_path, notice: "Theme cache cleared."
   end
 
   private
@@ -35,9 +35,5 @@ class ThemeSettingsController < ApplicationController
 
   def theme_params
     params.require(:theme_setting).permit(:primary, :accent1, :accent2, :warning, :danger, :dark, :light)
-  end
-
-  def admin_theme_edit_path
-    "/admin/theme"
   end
 end

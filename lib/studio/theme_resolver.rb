@@ -74,6 +74,7 @@ module Studio
 
     def light_mode_vars
       light_base = colors[:light] || "#f8fafc"
+      primary    = colors[:primary] || "#8E82FE"
 
       {
         "--color-page"           => light_base,
@@ -86,7 +87,12 @@ module Studio
         "--color-text-muted"     => "#94a3b8",
         "--color-border"         => ColorScale.darken(light_base, 0.08),
         "--color-border-strong"  => ColorScale.darken(light_base, 0.15),
-        "--color-shadow"         => "rgba(0,0,0,0.05)"
+        "--color-shadow"         => "rgba(0,0,0,0.05)",
+        "--color-cta"            => primary,
+        "--color-cta-hover"      => ColorScale.darken(primary, 0.30),
+        "--color-success"        => colors[:success] || "#4BAF50",
+        "--color-warning"        => colors[:warning] || "#FF7C47",
+        "--color-danger"         => colors[:danger] || "#EF4444"
       }
     end
   end
