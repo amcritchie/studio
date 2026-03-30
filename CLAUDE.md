@@ -21,7 +21,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 
 ### Controllers
 - `ErrorLogsController` — public index (ILIKE search) + show (slug lookup)
-- `SessionsController` — email/password login, logout, `sso_login` (GET one-click SSO), `sso_continue` (POST from button)
+- `SessionsController` — email/password login, logout, `sso_login` (GET one-click SSO), `sso_continue` (POST from button). SSO user creation extracted into private `authenticate_sso_user!` method shared by both SSO actions.
 - `OmniauthCallbacksController` — Google OAuth callback + failure (overridden in Turf Monster for merge support)
 - `RegistrationsController` — signup with configurable params via `Studio.registration_params`
 - `ThemeSettingsController` — admin-only theme editor (edit/update/regenerate). Auth via `require_admin_for_theme`.
@@ -61,7 +61,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `warning` → `--color-warning`
 - `danger` → `--color-danger`
 - `dark` → surface/inset/border colors for dark mode (lighten/darken percentages)
-- `light` → surface/inset/border colors for light mode
+- `light` → surface/inset/border colors for light mode (includes `--color-cta`, `--color-cta-hover`, `--color-success`, `--color-warning`, `--color-danger`)
 
 **Dynamic primary palette**: `primary_palette_vars` generates `--color-primary-{50..900}` shade scale + `--color-primary-{shade}-rgb` (space-separated RGB) for Tailwind `<alpha-value>` opacity support. Shared Tailwind config maps `primary-*` utilities to these CSS vars.
 
