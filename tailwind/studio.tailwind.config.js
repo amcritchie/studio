@@ -16,6 +16,21 @@ module.exports = {
         'surface-alt': 'var(--color-surface-alt)',
         inset:         'var(--color-inset)',
 
+        // Dynamic primary palette (from theme role colors)
+        primary: {
+          DEFAULT: 'rgb(var(--color-primary-rgb) / <alpha-value>)',
+          50:  'rgb(var(--color-primary-50-rgb) / <alpha-value>)',
+          100: 'rgb(var(--color-primary-100-rgb) / <alpha-value>)',
+          200: 'rgb(var(--color-primary-200-rgb) / <alpha-value>)',
+          300: 'rgb(var(--color-primary-300-rgb) / <alpha-value>)',
+          400: 'rgb(var(--color-primary-400-rgb) / <alpha-value>)',
+          500: 'rgb(var(--color-primary-500-rgb) / <alpha-value>)',
+          600: 'rgb(var(--color-primary-600-rgb) / <alpha-value>)',
+          700: 'rgb(var(--color-primary-700-rgb) / <alpha-value>)',
+          800: 'rgb(var(--color-primary-800-rgb) / <alpha-value>)',
+          900: 'rgb(var(--color-primary-900-rgb) / <alpha-value>)',
+        },
+
         mint: {
           DEFAULT: '#06D6A0',
           50: '#e6faf4',

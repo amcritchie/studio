@@ -12,14 +12,17 @@ module Studio
     def to_css
       dark_vars  = dark_mode_vars.map { |k, v| "  #{k}: #{v};" }.join("\n")
       light_vars = light_mode_vars.map { |k, v| "  #{k}: #{v};" }.join("\n")
+      palette_vars = primary_palette_vars.map { |k, v| "  #{k}: #{v};" }.join("\n")
 
       <<~CSS
         :root, .dark {
         #{dark_vars}
+        #{palette_vars}
         }
 
         html:not(.dark) {
         #{light_vars}
+        #{palette_vars}
         }
       CSS
     end
@@ -47,6 +50,26 @@ module Studio
         "--color-warning"        => colors[:warning] || "#FF7C47",
         "--color-danger"         => colors[:danger] || "#EF4444"
       }
+    end
+
+    # Generate --color-primary-{50..900} + RGB variants for Tailwind opacity support
+    def primary_palette_vars
+      primary = colors[:primary] || "#8E82FE"
+      scale = ColorScale.generate(primary)
+      vars = {}
+
+      scale.each do |shade, hex|
+        vars["--color-primary-#{shade}"] = hex
+        r, g, b = ColorScale.hex_to_rgb(hex)
+        vars["--color-primary-#{shade}-rgb"] = "#{r} #{g} #{b}"
+      end
+
+      # DEFAULT aliases
+      r, g, b = ColorScale.hex_to_rgb(primary)
+      vars["--color-primary"] = primary
+      vars["--color-primary-rgb"] = "#{r} #{g} #{b}"
+
+      vars
     end
 
     def light_mode_vars
