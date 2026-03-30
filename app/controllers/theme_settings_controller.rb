@@ -38,6 +38,6 @@ class ThemeSettingsController < ApplicationController
   end
 
   def admin_theme_edit_path
-    "/admin/theme/edit"
+    "/admin/theme"
   end
 end

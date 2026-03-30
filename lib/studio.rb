@@ -51,8 +51,8 @@ module Studio
       resources :error_logs, only: [:index, :show]
 
       # Theme admin
-      get   "admin/theme/edit",       to: "theme_settings#edit",       as: :admin_theme_edit
-      patch "admin/theme/update",     to: "theme_settings#update",     as: :admin_theme_update
+      get   "admin/theme",            to: "theme_settings#edit",       as: :admin_theme
+      patch "admin/theme",            to: "theme_settings#update",     as: :admin_theme_update
       post  "admin/theme/regenerate", to: "theme_settings#regenerate", as: :admin_theme_regenerate
     end
   end
