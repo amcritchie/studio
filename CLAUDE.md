@@ -89,7 +89,11 @@ Studio.configure do |config|
   config.welcome_message = ->(user) { "Welcome, #{user.display_name}!" }
   config.registration_params = [:name, :email, :password, :password_confirmation]
   config.configure_sso_user = ->(user) { user.role = "viewer" }
-  config.theme_logos = %w[logo-icon.svg icon.svg icon.png studio-logo.svg favicon.png]
+  config.theme_logos = [
+    { file: "favicon.png",      title: "Favicon" },
+    { file: "logo-icon.svg",    title: "Navbar Logo" },
+    { file: "studio-logo.svg",  title: "SSO Logo" },
+  ]
   # Theme uses defaults (violet primary) — no theme_* config needed
 end
 
@@ -98,7 +102,11 @@ Studio.configure do |config|
   config.app_name = "Turf Monster"
   config.session_key = :turf_user_id
   config.configure_sso_user = ->(user) { user.balance_cents = 0 }
-  config.theme_logos = %w[logo.png logo.jpeg icon.svg icon.png favicon.png]
+  config.theme_logos = [
+    { file: "favicon.png",   title: "Favicon" },
+    { file: "logo.png",      title: "Navbar Logo" },
+    { file: "logo.jpeg",     title: "Auth Logo" },
+  ]
   config.theme_primary = "#4BAF50"  # green
   config.theme_accent = "#8E82FE"   # violet
 end
@@ -114,7 +122,7 @@ end
 | `theme_danger` | `#EF4444` | Destructive actions |
 | `theme_dark` | `#1A1535` | Dark mode base |
 | `theme_light` | `#f8fafc` | Light mode base |
-| `theme_logos` | `[]` | Array of logo filenames from `public/` for styleguide |
+| `theme_logos` | `[]` | Array of `{ file:, title: }` hashes (or plain strings) for logo display on theme page |
 
 ### Theme Routes
 - `GET /admin/theme` → `theme_settings#edit` (admin-only theme editor + styleguide)
