@@ -106,6 +106,23 @@
   <%# ── Styleguide ── %>
   <div class="border-t border-subtle mt-12 pt-12 space-y-12">
 
+    <% if Studio.theme_logos.any? %>
+    <%# ── Logos ── %>
+    <section>
+      <h2 class="text-xl font-bold text-heading mb-4">Logos</h2>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <% Studio.theme_logos.each do |file| %>
+          <div class="card p-4 space-y-3">
+            <p class="label-upper"><%= file %></p>
+            <div class="flex items-center justify-center w-20 h-20 rounded-lg" style="background-color: #fff; background-image: linear-gradient(45deg, #d0d0d0 25%, transparent 25%, transparent 75%, #d0d0d0 75%), linear-gradient(45deg, #d0d0d0 25%, transparent 25%, transparent 75%, #d0d0d0 75%); background-size: 12px 12px; background-position: 0 0, 6px 6px;">
+              <img src="/<%= file %>" alt="<%= file %>" class="max-w-16 max-h-16 rounded">
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </section>
+    <% end %>
+
     <%# ── Semantic Tokens ── %>
     <section>
       <h2 class="text-xl font-bold text-heading mb-4">Semantic Tokens</h2>

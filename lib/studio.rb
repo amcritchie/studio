@@ -11,6 +11,7 @@ module Studio
   mattr_accessor :configure_new_user,  default: ->(user) {}
   mattr_accessor :configure_sso_user,  default: ->(user) {}
   mattr_accessor :sso_logo,            default: nil
+  mattr_accessor :theme_logos,         default: []
 
   # Theme role colors (7 roles)
   mattr_accessor :theme_primary,  default: "#8E82FE"
