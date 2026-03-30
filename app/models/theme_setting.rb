@@ -1,0 +1,25 @@
+class ThemeSetting < ApplicationRecord
+  include Sluggable
+
+  ROLES = %i[primary accent1 accent2 warning danger dark light].freeze
+
+  validates :app_name, presence: true, uniqueness: true
+
+  # Returns the ThemeSetting for the current app, or a new unsaved instance.
+  def self.current
+    find_by(app_name: Studio.app_name) || new(app_name: Studio.app_name)
+  end
+
+  # Merged colors: DB values override Studio.theme_config defaults.
+  def resolved_colors
+    defaults = Studio.theme_config
+    ROLES.each_with_object({}) do |role, hash|
+      db_val = read_attribute(role)
+      hash[role] = db_val.presence || defaults[role]
+    end.compact
+  end
+
+  def name_slug
+    "theme-#{app_name.parameterize}"
+  end
+end

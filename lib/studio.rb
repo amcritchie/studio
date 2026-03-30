@@ -1,5 +1,7 @@
 require "studio/version"
 require "studio/engine"
+require "studio/color_scale"
+require "studio/theme_resolver"
 
 module Studio
   mattr_accessor :app_name,            default: "Studio"
@@ -10,8 +12,29 @@ module Studio
   mattr_accessor :configure_sso_user,  default: ->(user) {}
   mattr_accessor :sso_logo,            default: nil
 
+  # Theme role colors (7 roles)
+  mattr_accessor :theme_primary,  default: "#8E82FE"
+  mattr_accessor :theme_accent1,  default: "#06D6A0"
+  mattr_accessor :theme_accent2,  default: nil
+  mattr_accessor :theme_warning,  default: "#FF7C47"
+  mattr_accessor :theme_danger,   default: "#EF4444"
+  mattr_accessor :theme_dark,     default: "#1A1535"
+  mattr_accessor :theme_light,    default: "#f8fafc"
+
   def self.configure
     yield self
+  end
+
+  def self.theme_config
+    {
+      primary: theme_primary,
+      accent1: theme_accent1,
+      accent2: theme_accent2,
+      warning: theme_warning,
+      danger:  theme_danger,
+      dark:    theme_dark,
+      light:   theme_light
+    }.compact
   end
 
   def self.routes(router)
@@ -26,6 +49,11 @@ module Studio
       get  "auth/:provider/callback", to: "omniauth_callbacks#create"
       get  "auth/failure", to: "omniauth_callbacks#failure"
       resources :error_logs, only: [:index, :show]
+
+      # Theme admin
+      get   "admin/theme/edit",       to: "theme_settings#edit"
+      patch "admin/theme",            to: "theme_settings#update"
+      post  "admin/theme/regenerate", to: "theme_settings#regenerate"
     end
   end
 end

@@ -1,0 +1,167 @@
+<div class="max-w-5xl mx-auto px-4 py-8" x-data="themeEditor()">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-2xl font-bold text-heading">Theme Editor</h1>
+    <div class="flex gap-3">
+      <%= form_tag("/admin/theme/regenerate", method: :post) do %>
+        <button type="submit" class="btn btn-outline btn-sm">Regenerate Cache</button>
+      <% end %>
+      <a href="/admin/theme" class="btn btn-outline btn-sm">Styleguide</a>
+    </div>
+  </div>
+
+  <%= form_tag("/admin/theme", method: :patch) do %>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Color Inputs -->
+      <div class="card p-6">
+        <h2 class="text-lg font-bold text-heading mb-6">Role Colors</h2>
+
+        <% ThemeSetting::ROLES.each do |role| %>
+          <% db_val = @theme_setting.send(role) %>
+          <% default_val = @defaults[role] %>
+          <% current_val = db_val.presence || default_val %>
+          <div class="flex items-center gap-4 mb-4">
+            <input type="color"
+                   name="theme_setting[<%= role %>]"
+                   value="<%= current_val || '#000000' %>"
+                   x-model="colors.<%= role %>"
+                   @input="updatePreview()"
+                   class="w-10 h-10 rounded cursor-pointer border border-subtle"
+                   style="padding: 1px;">
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-heading font-medium text-sm"><%= role.to_s.titleize %></span>
+                <% if db_val.present? %>
+                  <span class="text-xs text-muted">(custom)</span>
+                <% end %>
+              </div>
+              <span class="text-xs text-secondary font-mono" x-text="colors.<%= role %>"><%= current_val %></span>
+            </div>
+            <% if default_val %>
+              <button type="button"
+                      @click="resetColor('<%= role %>', '<%= default_val %>')"
+                      class="text-xs text-muted hover:text-heading transition"
+                      title="Reset to default (<%= default_val %>)">
+                Reset
+              </button>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="flex gap-3 mt-6 pt-6 border-t border-subtle">
+          <button type="submit" class="btn btn-primary">Save Theme</button>
+        </div>
+      </div>
+
+      <!-- Live Preview -->
+      <div class="space-y-6">
+        <!-- Dark Preview -->
+        <div class="rounded-xl border border-subtle overflow-hidden">
+          <div class="px-4 py-2 bg-surface-alt">
+            <span class="text-xs font-bold text-secondary uppercase tracking-wider">Dark Mode Preview</span>
+          </div>
+          <div class="p-6" :style="darkPreviewStyle()">
+            <h3 class="font-bold mb-1" :style="{ color: '#ffffff' }">Page Heading</h3>
+            <p class="text-sm mb-4" :style="{ color: '#e2e8f0' }">Body text on the page surface.</p>
+            <div class="rounded-lg p-4 mb-4" :style="darkSurfaceStyle()">
+              <p class="text-sm mb-3" :style="{ color: '#94a3b8' }">Card on surface with secondary text.</p>
+              <div class="flex gap-2">
+                <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.primary }">Primary</button>
+                <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.accent1 || '#06D6A0' }">Accent</button>
+                <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.danger || '#EF4444' }">Danger</button>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :style="{ backgroundColor: colors.primary + '33', color: colors.primary, border: '1px solid ' + colors.primary + '55' }">Badge</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :style="{ backgroundColor: (colors.accent1 || '#06D6A0') + '33', color: colors.accent1 || '#06D6A0', border: '1px solid ' + (colors.accent1 || '#06D6A0') + '55' }">Success</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Light Preview -->
+        <div class="rounded-xl border border-subtle overflow-hidden">
+          <div class="px-4 py-2 bg-surface-alt">
+            <span class="text-xs font-bold text-secondary uppercase tracking-wider">Light Mode Preview</span>
+          </div>
+          <div class="p-6" :style="lightPreviewStyle()">
+            <h3 class="font-bold mb-1" :style="{ color: '#0f172a' }">Page Heading</h3>
+            <p class="text-sm mb-4" :style="{ color: '#334155' }">Body text on the page surface.</p>
+            <div class="rounded-lg p-4 mb-4" :style="lightSurfaceStyle()">
+              <p class="text-sm mb-3" :style="{ color: '#64748b' }">Card on surface with secondary text.</p>
+              <div class="flex gap-2">
+                <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.primary }">Primary</button>
+                <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.accent1 || '#06D6A0' }">Accent</button>
+                <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.danger || '#EF4444' }">Danger</button>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :style="{ backgroundColor: colors.primary + '33', color: colors.primary, border: '1px solid ' + colors.primary + '55' }">Badge</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :style="{ backgroundColor: (colors.accent1 || '#06D6A0') + '33', color: colors.accent1 || '#06D6A0', border: '1px solid ' + (colors.accent1 || '#06D6A0') + '55' }">Success</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  function themeEditor() {
+    return {
+      colors: {
+        primary: '<%= @theme_setting.resolved_colors[:primary] %>',
+        accent1: '<%= @theme_setting.resolved_colors[:accent1] %>',
+        accent2: '<%= @theme_setting.resolved_colors[:accent2] %>',
+        warning: '<%= @theme_setting.resolved_colors[:warning] %>',
+        danger:  '<%= @theme_setting.resolved_colors[:danger] %>',
+        dark:    '<%= @theme_setting.resolved_colors[:dark] %>',
+        light:   '<%= @theme_setting.resolved_colors[:light] %>'
+      },
+
+      resetColor(role, defaultVal) {
+        this.colors[role] = defaultVal;
+        this.updatePreview();
+      },
+
+      updatePreview() {
+        // Update live CSS vars on the document for immediate feedback
+        document.documentElement.style.setProperty('--color-cta', this.colors.primary);
+        document.documentElement.style.setProperty('--color-success', this.colors.accent1 || '#06D6A0');
+        document.documentElement.style.setProperty('--color-warning', this.colors.warning || '#FF7C47');
+        document.documentElement.style.setProperty('--color-danger', this.colors.danger || '#EF4444');
+      },
+
+      darkPreviewStyle() {
+        return { backgroundColor: this.colors.dark, borderRadius: '0' };
+      },
+
+      darkSurfaceStyle() {
+        return {
+          backgroundColor: this.lightenColor(this.colors.dark, 0.3),
+          border: '1px solid rgba(255,255,255,0.1)'
+        };
+      },
+
+      lightPreviewStyle() {
+        return { backgroundColor: this.colors.light, borderRadius: '0' };
+      },
+
+      lightSurfaceStyle() {
+        return {
+          backgroundColor: '#ffffff',
+          border: '1px solid #e2e8f0'
+        };
+      },
+
+      lightenColor(hex, amount) {
+        hex = hex.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        const nr = Math.round(r + (255 - r) * amount);
+        const ng = Math.round(g + (255 - g) * amount);
+        const nb = Math.round(b + (255 - b) * amount);
+        return '#' + [nr, ng, nb].map(c => c.toString(16).padStart(2, '0')).join('');
+      }
+    };
+  }
+</script>
