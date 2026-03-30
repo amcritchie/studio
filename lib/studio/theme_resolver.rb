@@ -1,6 +1,6 @@
 module Studio
   class ThemeResolver
-    ROLES = %i[primary accent1 accent2 warning danger dark light].freeze
+    ROLES = %i[primary success accent warning danger dark light].freeze
 
     attr_reader :colors
 
@@ -46,7 +46,7 @@ module Studio
         "--color-shadow"         => "transparent",
         "--color-cta"            => primary,
         "--color-cta-hover"      => ColorScale.darken(primary, 0.30),
-        "--color-success"        => colors[:accent1] || "#06D6A0",
+        "--color-success"        => colors[:success] || "#06D6A0",
         "--color-warning"        => colors[:warning] || "#FF7C47",
         "--color-danger"         => colors[:danger] || "#EF4444"
       }

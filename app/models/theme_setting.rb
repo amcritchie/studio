@@ -1,7 +1,12 @@
 class ThemeSetting < ApplicationRecord
   include Sluggable
 
-  ROLES = %i[primary accent1 accent2 warning danger dark light].freeze
+  ROLES = %i[primary success accent warning danger dark light].freeze
+
+  # Map DB columns (accent1/accent2) to role names (success/accent)
+  def self.db_column_for(role)
+    { success: :accent1, accent: :accent2 }[role] || role
+  end
 
   validates :app_name, presence: true, uniqueness: true
 
@@ -14,7 +19,7 @@ class ThemeSetting < ApplicationRecord
   def resolved_colors
     defaults = Studio.theme_config
     ROLES.each_with_object({}) do |role, hash|
-      db_val = read_attribute(role)
+      db_val = read_attribute(self.class.db_column_for(role))
       hash[role] = db_val.presence || defaults[role]
     end.compact
   end

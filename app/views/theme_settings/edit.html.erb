@@ -16,12 +16,13 @@
         <h2 class="text-lg font-bold text-heading mb-6">Role Colors</h2>
 
         <% ThemeSetting::ROLES.each do |role| %>
-          <% db_val = @theme_setting.send(role) %>
+          <% db_col = ThemeSetting.db_column_for(role) %>
+          <% db_val = @theme_setting.read_attribute(db_col) %>
           <% default_val = @defaults[role] %>
           <% current_val = db_val.presence || default_val %>
           <div class="flex items-center gap-4 mb-4">
             <input type="color"
-                   name="theme_setting[<%= role %>]"
+                   name="theme_setting[<%= db_col %>]"
                    value="<%= current_val || '#000000' %>"
                    x-model="colors.<%= role %>"
                    @input="updatePreview()"
@@ -66,13 +67,13 @@
               <p class="text-sm mb-3" :style="{ color: '#94a3b8' }">Card on surface with secondary text.</p>
               <div class="flex gap-2">
                 <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.primary }">Primary</button>
-                <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.accent1 || '#06D6A0' }">Accent</button>
+                <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.success || '#06D6A0' }">Accent</button>
                 <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.danger || '#EF4444' }">Danger</button>
               </div>
             </div>
             <div class="flex gap-2">
               <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :style="{ backgroundColor: colors.primary + '33', color: colors.primary, border: '1px solid ' + colors.primary + '55' }">Badge</span>
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :style="{ backgroundColor: (colors.accent1 || '#06D6A0') + '33', color: colors.accent1 || '#06D6A0', border: '1px solid ' + (colors.accent1 || '#06D6A0') + '55' }">Success</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :style="{ backgroundColor: (colors.success || '#06D6A0') + '33', color: colors.success || '#06D6A0', border: '1px solid ' + (colors.success || '#06D6A0') + '55' }">Success</span>
             </div>
           </div>
         </div>
@@ -89,13 +90,13 @@
               <p class="text-sm mb-3" :style="{ color: '#64748b' }">Card on surface with secondary text.</p>
               <div class="flex gap-2">
                 <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.primary }">Primary</button>
-                <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.accent1 || '#06D6A0' }">Accent</button>
+                <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.success || '#06D6A0' }">Accent</button>
                 <button class="btn btn-sm text-white rounded-lg px-3 py-1.5 text-xs font-bold" :style="{ backgroundColor: colors.danger || '#EF4444' }">Danger</button>
               </div>
             </div>
             <div class="flex gap-2">
               <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :style="{ backgroundColor: colors.primary + '33', color: colors.primary, border: '1px solid ' + colors.primary + '55' }">Badge</span>
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :style="{ backgroundColor: (colors.accent1 || '#06D6A0') + '33', color: colors.accent1 || '#06D6A0', border: '1px solid ' + (colors.accent1 || '#06D6A0') + '55' }">Success</span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :style="{ backgroundColor: (colors.success || '#06D6A0') + '33', color: colors.success || '#06D6A0', border: '1px solid ' + (colors.success || '#06D6A0') + '55' }">Success</span>
             </div>
           </div>
         </div>
@@ -109,8 +110,8 @@
     return {
       colors: {
         primary: '<%= @theme_setting.resolved_colors[:primary] %>',
-        accent1: '<%= @theme_setting.resolved_colors[:accent1] %>',
-        accent2: '<%= @theme_setting.resolved_colors[:accent2] %>',
+        success: '<%= @theme_setting.resolved_colors[:success] %>',
+        accent:  '<%= @theme_setting.resolved_colors[:accent] %>',
         warning: '<%= @theme_setting.resolved_colors[:warning] %>',
         danger:  '<%= @theme_setting.resolved_colors[:danger] %>',
         dark:    '<%= @theme_setting.resolved_colors[:dark] %>',
@@ -125,7 +126,7 @@
       updatePreview() {
         // Update live CSS vars on the document for immediate feedback
         document.documentElement.style.setProperty('--color-cta', this.colors.primary);
-        document.documentElement.style.setProperty('--color-success', this.colors.accent1 || '#06D6A0');
+        document.documentElement.style.setProperty('--color-success', this.colors.success);
         document.documentElement.style.setProperty('--color-warning', this.colors.warning || '#FF7C47');
         document.documentElement.style.setProperty('--color-danger', this.colors.danger || '#EF4444');
       },
