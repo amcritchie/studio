@@ -24,12 +24,14 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `SessionsController` — email/password login, logout, `sso_login` (GET one-click SSO), `sso_continue` (POST from button)
 - `OmniauthCallbacksController` — Google OAuth callback + failure (overridden in Turf Monster for merge support)
 - `RegistrationsController` — signup with configurable params via `Studio.registration_params`
+- `ThemeSettingsController` — admin-only theme editor (edit/update/regenerate). Auth via `require_admin_for_theme`.
 
 ### Concern
 - `Studio::ErrorHandling` — `current_user`, `logged_in?`, `require_authentication`, `set_app_session`, `clear_app_session`, `sso_user_available?`, `sso_display_name`, `sso_source_app`, `sso_hub_logo`, `rescue_and_log`, `create_error_log`, `handle_not_found`, `handle_unexpected_error`
 
 ### Models
 - `ErrorLog` — polymorphic target/parent, `capture!(exception)`, cleaned backtrace
+- `ThemeSetting` — single-row-per-app (keyed by `app_name`), 7 nullable color columns, `resolved_colors` merges DB + config defaults
 - `Sluggable` concern — `before_save :set_slug`, `to_param` returns slug
 
 ### Views
@@ -39,13 +41,34 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `sessions/_sso_continue.html.erb` — "Continue as" button partial for cross-app awareness
 - `registrations/new.html.erb` — generic signup, conditional name field based on config
 - `components/_theme_toggle.html.erb` — sun/moon toggle button for dark/light mode
-- `components/_admin_dropdown.html.erb` — gear icon dropdown (Alpine.js) with links to Theme styleguide (`/admin/theme`) and Error Logs (`/error_logs`). Used in both apps' navbars.
+- `components/_admin_dropdown.html.erb` — gear icon dropdown (Alpine.js) with links to Theme Editor (`/admin/theme/edit`), Styleguide (`/admin/theme`), and Error Logs (`/error_logs`). Used in both apps' navbars.
+- `theme_settings/edit.html.erb` — admin theme editor with 7 color pickers, live preview (dark/light), save + regenerate cache buttons
 
-### Theme System (Shared Tailwind Config)
+### Helpers
+- `StudioThemeHelper` — `studio_theme_css_tag` method: loads colors from `ThemeSetting.current` (DB) → falls back to `Studio.theme_config` → runs through `Studio::ThemeResolver` → renders as `<style>` tag. Cached via `Rails.cache` (1-hour TTL).
 
-The engine's `studio.tailwind.config.js` defines semantic color tokens that map to CSS custom properties. Each app sets `--color-*` variables in its `application.tailwind.css` for dark and light themes.
+### Lib Modules
+- `Studio::ColorScale` — pure Ruby hex color math: `generate(hex)` returns 50-900 shade scale, `lighten`, `darken`, `hex_to_rgb`, `rgb_to_hex`, `with_opacity`
+- `Studio::ThemeResolver` — takes 7 role colors, derives all ~22 CSS custom properties for dark and light modes. `to_css` returns the full `:root, .dark { ... } html:not(.dark) { ... }` CSS string.
 
-**Tokens defined in config**: `page`, `surface`, `surface-alt`, `inset` (colors); `heading`, `body`, `secondary`, `muted` (textColor); `subtle`, `strong` (borderColor).
+### Dynamic Theme System
+
+**How it works**: `_head.html.erb` calls `studio_theme_css_tag` which injects a `<style>` tag with all CSS custom properties before the Tailwind stylesheet loads. Tailwind's semantic tokens (`bg-page`, `text-heading`, `border-subtle`) reference these CSS vars.
+
+**7 role colors** → all derived automatically:
+- `primary` → `--color-cta`, `--color-cta-hover`
+- `accent1` → `--color-success`
+- `warning` → `--color-warning`
+- `danger` → `--color-danger`
+- `dark` → surface/inset/border colors for dark mode (lighten/darken percentages)
+- `light` → surface/inset/border colors for light mode
+
+**Config**: `Studio.theme_*` accessors with defaults (violet primary). Apps override in `config/initializers/studio.rb`.
+**DB override**: `ThemeSetting` model — nullable columns fall back to config defaults. Admin editor at `/admin/theme/edit`.
+**Cache**: `Rails.cache.fetch("studio/theme/#{Studio.app_name}")` with 1-hour TTL. Regenerate button clears cache.
+**Migration**: Each app creates `theme_settings` table manually (consistent with `create_error_logs` pattern).
+
+**Tokens defined in shared Tailwind config**: `page`, `surface`, `surface-alt`, `inset` (colors); `heading`, `body`, `secondary`, `muted` (textColor); `subtle`, `strong` (borderColor).
 
 **FOUC prevention**: `_head.html.erb` includes a synchronous `<script>` that sets `class="dark"` from `localStorage.getItem('theme')` before any paint. Alpine theme store initialized on `alpine:init`.
 
@@ -60,10 +83,11 @@ See top-level `CLAUDE.md` for the full token reference table.
 Studio.configure do |config|
   config.app_name = "McRitchie Studio"
   config.session_key = :studio_user_id
-  config.sso_logo = "/studio-logo.svg"        # logo shown on satellite app SSO buttons
+  config.sso_logo = "/studio-logo.svg"
   config.welcome_message = ->(user) { "Welcome, #{user.display_name}!" }
   config.registration_params = [:name, :email, :password, :password_confirmation]
   config.configure_sso_user = ->(user) { user.role = "viewer" }
+  # Theme uses defaults (violet primary) — no theme_* config needed
 end
 
 # config/initializers/studio.rb (satellite app — Turf Monster)
@@ -71,8 +95,26 @@ Studio.configure do |config|
   config.app_name = "Turf Monster"
   config.session_key = :turf_user_id
   config.configure_sso_user = ->(user) { user.balance_cents = 0 }
+  config.theme_primary = "#4BAF50"  # green
+  config.theme_accent2 = "#8E82FE"  # violet
 end
 ```
+
+### Theme Config Options
+| Option | Default | Description |
+|--------|---------|-------------|
+| `theme_primary` | `#8E82FE` | CTAs, buttons, links |
+| `theme_accent1` | `#06D6A0` | Success accent |
+| `theme_accent2` | `nil` | Tertiary accent |
+| `theme_warning` | `#FF7C47` | Warning states |
+| `theme_danger` | `#EF4444` | Destructive actions |
+| `theme_dark` | `#1A1535` | Dark mode base |
+| `theme_light` | `#f8fafc` | Light mode base |
+
+### Theme Routes
+- `GET /admin/theme/edit` → `theme_settings#edit` (admin-only theme editor)
+- `PATCH /admin/theme/update` → `theme_settings#update` (save theme colors)
+- `POST /admin/theme/regenerate` → `theme_settings#regenerate` (clear cache)
 
 ## One-Way SSO: Hub → Satellite
 
