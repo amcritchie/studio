@@ -8,7 +8,7 @@ module Studio
 
       before_action :require_authentication
 
-      helper_method :current_user, :logged_in?, :sso_user_available?, :sso_display_name, :sso_source_app, :sso_hub_logo
+      helper_method :current_user, :logged_in?, :sso_user_available?, :sso_display_name, :sso_source_app, :sso_hub_logo, :admin?
     end
 
     private
@@ -89,6 +89,14 @@ module Studio
       unless logged_in?
         redirect_to login_path, alert: "Please log in to continue."
       end
+    end
+
+    def require_admin
+      return redirect_to root_path, alert: "Not authorized" unless logged_in? && current_user.admin?
+    end
+
+    def admin?
+      logged_in? && current_user.admin?
     end
 
     # Central error logging method — all controller error logging flows through here.

@@ -1,5 +1,5 @@
 class ThemeSettingsController < ApplicationController
-  before_action :require_admin_for_theme
+  before_action :require_admin
 
   def edit
     @theme_setting = ThemeSetting.current
@@ -28,10 +28,6 @@ class ThemeSettingsController < ApplicationController
   end
 
   private
-
-  def require_admin_for_theme
-    return redirect_to root_path, alert: "Not authorized" unless logged_in? && current_user.admin?
-  end
 
   def theme_params
     params.require(:theme_setting).permit(:primary, :accent1, :accent2, :warning, :danger, :dark, :light)
