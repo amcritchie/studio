@@ -1,7 +1,10 @@
 <section>
   <div class="mb-6">
     <% back_path = params[:q].present? ? error_logs_path(q: params[:q]) : error_logs_path %>
-    <%= link_to "&larr; #{params[:q].present? ? "Back to \"#{params[:q]}\"" : "All Errors"}".html_safe, back_path, class: "text-secondary hover:text-heading text-sm transition" %>
+    <% back_text = params[:q].present? ? "Back to \"#{params[:q]}\"" : "All Errors" %>
+    <%= link_to back_path, class: "text-secondary hover:text-heading text-sm transition" do %>
+      <span>&larr;</span> <%= back_text %>
+    <% end %>
   </div>
 
   <div class="card p-6 mb-6">
