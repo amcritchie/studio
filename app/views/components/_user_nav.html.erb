@@ -14,12 +14,12 @@
   <% if logged_in? %>
     <div class="leading-none flex-1">
       <div class="flex items-center gap-1 leading-none">
-        <%= render "components/admin_dropdown" %>
-        <%= render "components/theme_toggle" %>
-        <%= raw extra_icons_html %>
         <% if balance_html.present? %>
           <%= raw balance_html %>
         <% end %>
+        <%= render "components/admin_dropdown" %>
+        <%= render "components/theme_toggle" %>
+        <%= raw extra_icons_html %>
         <% account_link = defined?(account_path) ? account_path : "#" %>
         <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right ml-auto", style: "max-width: 4rem" do %>
           <%= current_user.display_name %>
