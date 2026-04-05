@@ -3,43 +3,47 @@
       balance_html     — raw HTML for balance display (e.g. Turf Monster wallet balance)
       extra_icons_html — raw HTML for app-specific icon buttons (e.g. refresh button)
       show_logout_link — boolean, show explicit "Log out" link (Studio uses this)
-      nav_width        — fixed width for the nav section (default: none)
 %>
 <% balance_html     ||= nil %>
 <% extra_icons_html ||= nil %>
 <% show_logout_link ||= false %>
-<% nav_width        ||= nil %>
 
-<div class="flex items-end gap-3" <%= "style=\"width: #{nav_width}\"".html_safe if nav_width %>>
+<div class="flex items-end gap-3 flex-1">
   <% if logged_in? %>
-    <div class="leading-none flex-1">
-      <div class="flex items-center gap-1 leading-none">
-        <% if balance_html.present? %>
-          <%= raw balance_html %>
-        <% end %>
-        <%= render "components/admin_dropdown" %>
-        <%= render "components/theme_toggle" %>
-        <%= raw extra_icons_html %>
+    <%# Left: balance + icons %>
+    <div class="flex items-center gap-1 leading-none">
+      <% if balance_html.present? %>
+        <%= raw balance_html %>
+      <% end %>
+      <%= render "components/admin_dropdown" %>
+      <%= render "components/theme_toggle" %>
+      <%= raw extra_icons_html %>
+    </div>
+    <%# Right: username + wallet + avatar %>
+    <div class="flex items-end gap-2 ml-auto leading-none">
+      <div class="leading-none text-right">
         <% account_link = defined?(account_path) ? account_path : "#" %>
-        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right ml-auto", style: "max-width: 4rem" do %>
+        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate block text-right", style: "max-width: 4rem" do %>
           <%= current_user.display_name %>
+        <% end %>
+        <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
+          <div class="text-muted font-mono text-[10px] mt-px"><%= current_user.truncated_solana %></div>
         <% end %>
         <% if show_logout_link %>
           <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
         <% end %>
       </div>
-      <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
-        <div class="text-right text-muted font-mono text-[10px] mt-px"><%= current_user.truncated_solana %></div>
+      <% account_link = defined?(account_path) ? account_path : "#" %>
+      <%= link_to account_link, class: "hover:opacity-80 transition flex-shrink-0" do %>
+        <%= render "components/avatar", user: current_user, size: "sm" %>
       <% end %>
     </div>
-    <% account_link = defined?(account_path) ? account_path : "#" %>
-    <%= link_to account_link, class: "hover:opacity-80 transition flex-shrink-0" do %>
-      <%= render "components/avatar", user: current_user, size: "sm" %>
-    <% end %>
   <% else %>
     <%= render "components/admin_dropdown" %>
     <%= render "components/theme_toggle" %>
-    <%= link_to "Log in", login_path, class: "text-heading hover:text-primary text-sm font-semibold transition" %>
-    <%= link_to "Sign up", signup_path, class: "btn btn-primary btn-sm" %>
+    <div class="flex items-center gap-3 ml-auto">
+      <%= link_to "Log in", login_path, class: "text-heading hover:text-primary text-sm font-semibold transition" %>
+      <%= link_to "Sign up", signup_path, class: "btn btn-primary btn-sm" %>
+    </div>
   <% end %>
 </div>
