@@ -1,0 +1,41 @@
+<%# Shared right-side navbar user section.
+    Locals (all optional):
+      balance_html     — raw HTML for balance display (e.g. Turf Monster wallet balance)
+      extra_icons_html — raw HTML for app-specific icon buttons (e.g. refresh button)
+      show_logout_link — boolean, show explicit "Log out" link (Studio uses this)
+%>
+<% balance_html     ||= nil %>
+<% extra_icons_html ||= nil %>
+<% show_logout_link ||= false %>
+
+<div class="flex items-center gap-3">
+  <%= render "components/admin_dropdown" %>
+  <%= render "components/theme_toggle" %>
+  <% if logged_in? %>
+    <%= raw extra_icons_html %>
+    <div class="leading-none">
+      <div class="flex items-center gap-2 leading-none">
+        <% if balance_html.present? %>
+          <%= raw balance_html %>
+        <% end %>
+        <% account_link = defined?(account_path) ? account_path : "#" %>
+        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-sm leading-none" do %>
+          <%= current_user.display_name %>
+        <% end %>
+        <% if show_logout_link %>
+          <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
+        <% end %>
+      </div>
+      <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
+        <div class="text-right text-muted font-mono text-[10px] mt-px"><%= current_user.truncated_solana %></div>
+      <% end %>
+    </div>
+    <% account_link = defined?(account_path) ? account_path : "#" %>
+    <%= link_to account_link, class: "hover:opacity-80 transition" do %>
+      <%= render "components/avatar", user: current_user, size: "sm" %>
+    <% end %>
+  <% else %>
+    <%= link_to "Log in", login_path, class: "text-heading hover:text-primary text-sm font-semibold transition" %>
+    <%= link_to "Sign up", signup_path, class: "btn btn-primary btn-sm" %>
+  <% end %>
+</div>
