@@ -209,6 +209,28 @@ McRitchie Studio is the central auth hub. Satellite apps (Turf Monster, future a
 3. In each app: `bundle update studio` to pull the latest
 4. Test both apps after updating
 
+## Testing
+
+- `bin/rails test` — run from within a consuming app (engine has no standalone test harness)
+- ~20 tests in Studio Engine (ColorScale, ThemeResolver, Config)
+- Engine tests live in consuming apps' test suites (test engine models/helpers as part of app tests)
+- **Critical test targets**: `Studio::ColorScale` (pure functions), `Studio::ThemeResolver` (CSS generation), `ErrorLog.capture!`, `Sluggable` concern
+
+## View Override Example
+
+To customize an engine view, create the same path in your app:
+
+```
+# Engine provides: studio/app/views/sessions/new.html.erb
+# App overrides: myapp/app/views/sessions/new.html.erb (app wins)
+```
+
+Common overrides:
+- `sessions/new.html.erb` — branded login page
+- `registrations/new.html.erb` — branded signup page
+- `sessions/_sso_continue.html.erb` — custom SSO button styling
+- `components/_admin_dropdown.html.erb` — app-specific admin links
+
 ## Code Standards
 
 Follow the same conventions as the top-level `CLAUDE.md`:

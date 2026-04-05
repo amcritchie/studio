@@ -1,0 +1,88 @@
+# Runbook -- Studio Engine
+
+Troubleshooting guide for autonomous agents. Format: problem, diagnosis, fix.
+
+## Consuming App Won't Load Engine
+
+**`Bundler::GemNotFound` for studio**
+- Diagnosis: Gemfile points to GitHub but bundle can't fetch. Network issue or repo is private.
+- Fix: Test connectivity: `git ls-remote https://github.com/amcritchie/studio.git`. If it fails, check GitHub status and SSH/HTTPS auth. In the consuming app: `bundle install --verbose`.
+
+**Engine classes not available (NameError)**
+- Diagnosis: `ErrorLog`, `Sluggable`, or `Studio::ErrorHandling` not found. Engine not loaded.
+- Fix: Verify `gem "studio", git: "https://github.com/amcritchie/studio.git"` is in the consuming app's Gemfile. Run `bundle install`. Check `config/initializers/studio.rb` exists with a `Studio.configure` block. Verify `Studio.routes(self)` is in `config/routes.rb`.
+
+**`Studio` constant undefined at boot**
+- Diagnosis: Initializer runs before engine loads.
+- Fix: The engine's `lib/studio.rb` defines the module. Ensure `require "studio"` is not called manually -- Bundler handles it. Check load order: engine gems load before app initializers.
+
+## View Overrides Not Working
+
+**App view not taking precedence over engine view**
+- Diagnosis: Rails loads app views before engine views. If the app view has a different path, it won't override.
+- Fix: The override path must match exactly. Engine view at `studio/app/views/sessions/new.html.erb` is overridden by `myapp/app/views/sessions/new.html.erb`. Check for typos in directory names. Common overrides: `sessions/new`, `registrations/new`, `sessions/_sso_continue`, `components/_admin_dropdown`.
+
+**Cached view showing old engine version**
+- Diagnosis: After `bundle update studio`, Rails may serve a cached view from the previous engine version.
+- Fix: Restart the Rails server. In development: `bin/rails tmp:cache:clear`. On Heroku, deploys clear the cache automatically.
+
+**Partial not found after engine update**
+- Diagnosis: Engine partial was renamed or moved. `ActionView::MissingTemplate` error.
+- Fix: Check the engine's current view paths: `ls /Users/alex/projects/studio/app/views/`. If the app has a local override of a removed partial, delete the app's version.
+
+## Theme Not Updating
+
+**Colors stale after ThemeSetting change**
+- Diagnosis: `studio_theme_css_tag` reads from Rails cache. Cache key: `studio/theme/<app_name>`. TTL is 1 hour.
+- Fix: Clear cache for the specific app. In the consuming app's console: `Rails.cache.delete("studio/theme/#{Studio.app_name}")`. Or visit `/admin/theme` and click "Regenerate Cache".
+
+**DB values not overriding config defaults**
+- Diagnosis: `ThemeSetting` has nullable columns. A nil column falls back to `Studio.theme_config` defaults.
+- Fix: Check the DB record: `ThemeSetting.current.attributes`. Verify the column name matches. DB uses `accent1`/`accent2` for the `success`/`accent` roles -- mapped via `ThemeSetting.db_column_for`. Setting a column to nil intentionally resets to config default.
+
+**CSS vars not generating primary palette**
+- Diagnosis: `--color-primary-{50..900}` or `-rgb` variants missing from rendered `<style>` tag.
+- Fix: Check `Studio::ThemeResolver` receives a valid hex for `primary`. In console: `Studio::ThemeResolver.new(Studio.theme_config).to_css` -- inspect the output. If the primary color is nil or empty, palette generation is skipped.
+
+**Theme page (admin/theme) returns 403/redirect**
+- Diagnosis: `require_admin_for_theme` before_action rejects non-admin users.
+- Fix: Verify the logged-in user has `role == "admin"`. Check `current_user.admin?` in console.
+
+## SSO Session Issues
+
+**Shared cookie not working across subdomains**
+- Diagnosis: SSO relies on `_studio_session` cookie spanning `*.mcritchie.studio`. If domain config is wrong, apps can't read each other's session data.
+- Fix: Both apps must have identical `config/initializers/session_store.rb`: `key: "_studio_session", domain: (Rails.env.production? ? ".mcritchie.studio" : :all)`. Both must share the same `SECRET_KEY_BASE` env var.
+
+**`sso_user_available?` returns false**
+- Diagnosis: Three conditions required: (1) not logged in to current app, (2) `sso_email` present in session, (3) `sso_source` is a different app.
+- Fix: Log into the hub app (McRitchie Studio) first -- this populates `sso_*` fields. Check that `Studio.session_key` is unique per app (`:studio_user_id` vs `:turf_user_id`). If both apps use the same key, SSO detection breaks.
+
+**Session key conflicts**
+- Diagnosis: Both apps use the same `config.session_key`. Logging into one app overwrites the other's session.
+- Fix: Each app MUST use a unique symbol: McRitchie Studio = `:studio_user_id`, Turf Monster = `:turf_user_id`. Set in `config/initializers/studio.rb`.
+
+## Error Log Search Performance
+
+**Slow ILIKE search on error_logs**
+- Diagnosis: `ErrorLogsController#index` uses ILIKE with wildcards for full-text search. Slow on large tables.
+- Fix: Check index: `\d error_logs` in psql. If no trigram index exists, add one: `CREATE INDEX idx_error_logs_message_trgm ON error_logs USING gin (message gin_trgm_ops);` (requires `pg_trgm` extension). For now, the table is small enough that sequential scan is acceptable.
+
+## Updating Engine and Pushing to Consumers
+
+**Standard update flow**
+1. Make changes in `/Users/alex/projects/studio/`
+2. Run engine tests: `cd /Users/alex/projects/studio && bin/rails test` (runs from a consuming app -- engine has no standalone harness)
+3. Commit and push: `git add -A && git commit -m "description" && git push`
+4. In McRitchie Studio: `cd /Users/alex/projects/mcritchie_studio && bundle update studio`
+5. In Turf Monster: `cd /Users/alex/projects/turf_monster && bundle update studio`
+6. Test both apps: `bin/rails test` in each
+7. Deploy both if all tests pass
+
+**Consumer locked to old version**
+- Diagnosis: `bundle update studio` doesn't pull the latest. Bundler may be caching the old ref.
+- Fix: `rm -rf vendor/cache/studio-*` in the consuming app, then `bundle update studio`. Check `Gemfile.lock` to verify the new revision.
+
+**Engine test approach**
+- Diagnosis: The engine has no standalone test harness. Tests run inside consuming apps.
+- Fix: Engine unit tests (ColorScale, ThemeResolver) live in consuming app test suites. To test engine changes: make the change, `bundle update studio` in a consuming app, run `bin/rails test` there. Critical test targets: `Studio::ColorScale`, `Studio::ThemeResolver`, `ErrorLog.capture!`, `Sluggable`.
