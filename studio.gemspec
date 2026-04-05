@@ -11,4 +11,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rails", ">= 7.0"
   spec.add_dependency "tailwindcss-rails", "~> 2.7"
+  spec.add_dependency "faker", ">= 2.0"
 end

@@ -2,6 +2,7 @@ require "studio/version"
 require "studio/engine"
 require "studio/color_scale"
 require "studio/theme_resolver"
+require "studio/username_generator"
 
 module Studio
   mattr_accessor :app_name,            default: "Studio"
