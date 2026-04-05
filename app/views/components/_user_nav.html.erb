@@ -9,12 +9,12 @@
 <% show_logout_link ||= false %>
 
 <div class="flex items-center gap-3">
-  <%= render "components/admin_dropdown" %>
-  <%= render "components/theme_toggle" %>
   <% if logged_in? %>
-    <%= raw extra_icons_html %>
     <div class="leading-none">
       <div class="flex items-baseline gap-1 leading-none">
+        <%= render "components/admin_dropdown" %>
+        <%= render "components/theme_toggle" %>
+        <%= raw extra_icons_html %>
         <% if balance_html.present? %>
           <%= raw balance_html %>
         <% end %>
@@ -35,6 +35,8 @@
       <%= render "components/avatar", user: current_user, size: "sm" %>
     <% end %>
   <% else %>
+    <%= render "components/admin_dropdown" %>
+    <%= render "components/theme_toggle" %>
     <%= link_to "Log in", login_path, class: "text-heading hover:text-primary text-sm font-semibold transition" %>
     <%= link_to "Sign up", signup_path, class: "btn btn-primary btn-sm" %>
   <% end %>
