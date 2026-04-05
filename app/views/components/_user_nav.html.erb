@@ -3,14 +3,16 @@
       balance_html     — raw HTML for balance display (e.g. Turf Monster wallet balance)
       extra_icons_html — raw HTML for app-specific icon buttons (e.g. refresh button)
       show_logout_link — boolean, show explicit "Log out" link (Studio uses this)
+      nav_width        — fixed width for the nav section (default: none)
 %>
 <% balance_html     ||= nil %>
 <% extra_icons_html ||= nil %>
 <% show_logout_link ||= false %>
+<% nav_width        ||= nil %>
 
-<div class="flex items-end gap-3">
+<div class="flex items-end gap-3" <%= "style=\"width: #{nav_width}\"".html_safe if nav_width %>>
   <% if logged_in? %>
-    <div class="leading-none">
+    <div class="leading-none flex-1">
       <div class="flex items-center gap-1 leading-none">
         <%= render "components/admin_dropdown" %>
         <%= render "components/theme_toggle" %>
@@ -19,7 +21,7 @@
           <%= raw balance_html %>
         <% end %>
         <% account_link = defined?(account_path) ? account_path : "#" %>
-        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right", style: "width: 4rem" do %>
+        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right ml-auto", style: "max-width: 4rem" do %>
           <%= current_user.display_name %>
         <% end %>
         <% if show_logout_link %>
@@ -31,7 +33,7 @@
       <% end %>
     </div>
     <% account_link = defined?(account_path) ? account_path : "#" %>
-    <%= link_to account_link, class: "hover:opacity-80 transition" do %>
+    <%= link_to account_link, class: "hover:opacity-80 transition flex-shrink-0" do %>
       <%= render "components/avatar", user: current_user, size: "sm" %>
     <% end %>
   <% else %>
