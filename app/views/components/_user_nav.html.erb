@@ -19,7 +19,7 @@
           <%= raw balance_html %>
         <% end %>
         <% account_link = defined?(account_path) ? account_path : "#" %>
-        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right", style: "width: 7.5rem" do %>
+        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right", style: "width: 4rem" do %>
           <%= current_user.display_name %>
         <% end %>
         <% if show_logout_link %>
