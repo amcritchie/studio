@@ -60,9 +60,23 @@
                setTimeout(function() { self.displayLevel += 1; self.leveledUp = true; }, 1500);
                setTimeout(function() { self.leveledUp = false; self.barWidth = 0; }, 2800);
                setTimeout(function() { self.barWidth = finalPct; }, 3000);
+             },
+             handleSeedsUpdate(d) {
+               var self = this;
+               if (d.levelUp) {
+                 self.barWidth = d.oldPct;
+                 setTimeout(function() { self.barWidth = 100; }, 300);
+                 setTimeout(function() { self.displayLevel = d.newLevel; self.leveledUp = true; }, 1500);
+                 setTimeout(function() { self.leveledUp = false; self.barWidth = 0; }, 2800);
+                 setTimeout(function() { self.barWidth = d.progress; }, 3000);
+               } else {
+                 self.displayLevel = d.level;
+                 self.barWidth = d.progress;
+               }
              }
            }"
            @navbar-replay-level.window="replayLevel()"
+           @navbar-seeds-update.window="handleSeedsUpdate($event.detail)"
            style="position: relative; height: 14px; margin-top: 3px;">
         <%# Green fill bar %>
         <div style="position: absolute; top: 0; left: 0; bottom: 0; background: #4BAF50; border-radius: 4px; z-index: 0; transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);" :style="{ width: barWidth + '%' }"></div>
