@@ -77,11 +77,11 @@
            }"
            @navbar-replay-level.window="replayLevel()"
            @navbar-seeds-update.window="handleSeedsUpdate($event.detail)"
-           style="position: relative; height: 14px; margin-top: 3px;">
-        <%# Green fill bar %>
-        <div style="position: absolute; top: 0; left: 0; bottom: 0; background: #4BAF50; border-radius: 4px; z-index: 0; transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);" :style="{ width: barWidth + '%' }"></div>
+           class="relative mt-0.5" style="height: 14px;">
+        <%# Fill bar %>
+        <div class="absolute inset-y-0 left-0 rounded z-0" style="background: var(--color-cta); transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);" :style="{ width: barWidth + '%' }"></div>
         <%# Text layer 1: muted (visible outside bar) %>
-        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-family: monospace; font-size: 10px; color: #6B7280; z-index: 1;">
+        <div class="absolute inset-0 flex items-center justify-between px-1.5 font-mono text-muted z-[1]" style="font-size: 10px;">
           <span>
             <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
               <%= current_user.truncated_solana %>
@@ -90,11 +90,11 @@
           <% if server_level %>
             <span :class="leveledUp && 'nav-level-pop'" x-text="'Level ' + displayLevel">Level <%= server_level %></span>
           <% elsif show_logout_link %>
-            <%= link_to "Log out", logout_path, style: "font-family: monospace; font-size: 10px; color: #6B7280; text-decoration: none;" %>
+            <%= link_to "Log out", logout_path, class: "font-mono text-muted no-underline", style: "font-size: 10px;" %>
           <% end %>
         </div>
         <%# Text layer 2: white (clip-path reveals where bar covers) %>
-        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-family: monospace; font-size: 10px; color: white; z-index: 2;" :style="{ 'clip-path': 'inset(0 ' + (100 - barWidth) + '% 0 0)' }">
+        <div class="absolute inset-0 flex items-center justify-between px-1.5 font-mono text-white z-[2]" style="font-size: 10px;" :style="{ 'clip-path': 'inset(0 ' + (100 - barWidth) + '% 0 0)' }">
           <span>
             <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
               <%= current_user.truncated_solana %>
@@ -103,7 +103,7 @@
           <% if server_level %>
             <span :class="leveledUp && 'nav-level-pop'" x-text="'Level ' + displayLevel">Level <%= server_level %></span>
           <% elsif show_logout_link %>
-            <%= link_to "Log out", logout_path, style: "font-family: monospace; font-size: 10px; color: white; text-decoration: none;" %>
+            <%= link_to "Log out", logout_path, class: "font-mono text-white no-underline", style: "font-size: 10px;" %>
           <% end %>
         </div>
       </div>
