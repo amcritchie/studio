@@ -8,20 +8,17 @@
 <% extra_icons_html ||= nil %>
 <% show_logout_link ||= false %>
 
-<div class="flex items-end gap-3">
+<div class="flex items-end gap-2">
   <% if logged_in? %>
-    <%# Left: balance + icons %>
-    <div class="flex items-center gap-1 leading-none">
+    <%# Main area: balance/icons on left, username on right — full width %>
+    <div class="flex items-end flex-1 gap-1 leading-none">
       <% if balance_html.present? %>
         <%= raw balance_html %>
       <% end %>
       <%= render "components/admin_dropdown" %>
       <%= render "components/theme_toggle" %>
       <%= raw extra_icons_html %>
-    </div>
-    <%# Right: username + wallet + avatar %>
-    <div class="flex items-end gap-2 ml-auto leading-none">
-      <div class="leading-none text-right">
+      <div class="leading-none text-right ml-auto">
         <% account_link = defined?(account_path) ? account_path : "#" %>
         <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate block text-right", style: "max-width: 4rem" do %>
           <%= current_user.display_name %>
@@ -33,11 +30,12 @@
           <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
         <% end %>
       </div>
-      <% account_link = defined?(account_path) ? account_path : "#" %>
-      <%= link_to account_link, class: "hover:opacity-80 transition flex-shrink-0" do %>
-        <%= render "components/avatar", user: current_user, size: "sm" %>
-      <% end %>
     </div>
+    <%# Avatar %>
+    <% account_link = defined?(account_path) ? account_path : "#" %>
+    <%= link_to account_link, class: "hover:opacity-80 transition flex-shrink-0" do %>
+      <%= render "components/avatar", user: current_user, size: "sm" %>
+    <% end %>
   <% else %>
     <%= render "components/admin_dropdown" %>
     <%= render "components/theme_toggle" %>
