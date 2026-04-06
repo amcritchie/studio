@@ -2,7 +2,9 @@ PATH
   remote: .
   specs:
     studio (0.2.4)
+      faker (>= 2.0)
       rails (>= 7.0)
+      solid_queue
       tailwindcss-rails (~> 2.7)
 
 GEM
@@ -83,7 +85,7 @@ GEM
       tzinfo (~> 2.0, >= 2.0.5)
     base64 (0.3.0)
     benchmark (0.5.0)
-    bigdecimal (4.1.0)
+    bigdecimal (4.1.1)
     builder (3.3.0)
     cgi (0.5.1)
     concurrent-ruby (1.3.6)
@@ -94,6 +96,13 @@ GEM
     erb (4.0.4)
       cgi (>= 0.3.3)
     erubi (1.13.1)
+    et-orbi (1.4.0)
+      tzinfo
+    faker (3.6.1)
+      i18n (>= 1.8.11, < 2)
+    fugit (1.12.1)
+      et-orbi (~> 1.4)
+      raabro (~> 1.4)
     globalid (1.3.0)
       activesupport (>= 6.1)
     i18n (1.14.8)
@@ -136,8 +145,9 @@ GEM
     psych (5.3.1)
       date
       stringio
+    raabro (1.4.0)
     racc (1.8.1)
-    rack (3.2.5)
+    rack (3.2.6)
     rack-session (2.1.1)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
@@ -184,6 +194,13 @@ GEM
     reline (0.6.3)
       io-console (~> 0.5)
     securerandom (0.4.1)
+    solid_queue (1.4.0)
+      activejob (>= 7.1)
+      activerecord (>= 7.1)
+      concurrent-ruby (>= 1.3.1)
+      fugit (~> 1.11)
+      railties (>= 7.1)
+      thor (>= 1.3.1)
     stringio (3.2.0)
     tailwindcss-rails (2.7.9-arm64-darwin)
       railties (>= 7.0.0)

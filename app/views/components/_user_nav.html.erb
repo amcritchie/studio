@@ -86,12 +86,11 @@
             <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
               <%= current_user.truncated_solana %>
             <% end %>
-            <% if show_logout_link %>
-              <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
-            <% end %>
           </span>
           <% if server_level %>
             <span :class="leveledUp && 'nav-level-pop'" x-text="'Level ' + displayLevel">Level <%= server_level %></span>
+          <% elsif show_logout_link %>
+            <%= link_to "Log out", logout_path, style: "font-family: monospace; font-size: 10px; color: #6B7280; text-decoration: none;" %>
           <% end %>
         </div>
         <%# Text layer 2: white (clip-path reveals where bar covers) %>
@@ -100,12 +99,11 @@
             <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
               <%= current_user.truncated_solana %>
             <% end %>
-            <% if show_logout_link %>
-              <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
-            <% end %>
           </span>
           <% if server_level %>
             <span :class="leveledUp && 'nav-level-pop'" x-text="'Level ' + displayLevel">Level <%= server_level %></span>
+          <% elsif show_logout_link %>
+            <%= link_to "Log out", logout_path, style: "font-family: monospace; font-size: 10px; color: white; text-decoration: none;" %>
           <% end %>
         </div>
       </div>
