@@ -30,11 +30,11 @@
         <% end %>
       </div>
       <%# Div 2 (Smaller): wallet address (left) + level (right) %>
-      <div class="relative" style="height: 18px;" :style="$store.devMode && 'background: sandybrown'">
-        <%# Green fill bar %>
-        <div class="absolute inset-y-0 left-0 rounded-sm" style="width: 90%; background: var(--color-cta);"></div>
+      <div style="position: relative; height: 20px;">
+        <%# Green fill bar — pure inline styles %>
+        <div style="position: absolute; top: 0; left: 0; bottom: 0; width: 90%; background: #4BAF50; border-radius: 4px; z-index: 0;"></div>
         <%# Text layer 1: muted (visible outside bar) %>
-        <div class="absolute inset-0 flex items-center justify-between px-1 text-muted font-mono text-[10px]">
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-family: monospace; font-size: 10px; color: #6B7280; z-index: 1;">
           <span>
             <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
               <%= current_user.truncated_solana %>
@@ -47,8 +47,8 @@
             <span>Level <%= current_user.level %></span>
           <% end %>
         </div>
-        <%# Text layer 2: white (clip-path reveals as bar covers) %>
-        <div class="absolute inset-0 flex items-center justify-between px-1 font-mono text-[10px]" style="color: white; clip-path: inset(0 10% 0 0);">
+        <%# Text layer 2: white (clip-path reveals where bar covers) %>
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-family: monospace; font-size: 10px; color: white; clip-path: inset(0 10% 0 0); z-index: 2;">
           <span>
             <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
               <%= current_user.truncated_solana %>
