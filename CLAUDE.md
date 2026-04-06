@@ -43,6 +43,9 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `components/_theme_toggle.html.erb` — sun/moon toggle button for dark/light mode
 - `components/_admin_dropdown.html.erb` — gear icon dropdown (Alpine.js) with links to Theme (`/admin/theme`) and Error Logs (`/error_logs`). Used in both apps' navbars. Turf Monster overrides locally with app-specific links.
 - `components/_user_nav.html.erb` — shared right-side navbar user section. Locals: `balance_html`, `extra_icons_html`, `show_logout_link`, `div2_html`. Logged in: two-row layout (Div 1: balance/icons/username, Div 2: seeds progress bar with clip-path text color + wallet address/level or logout link) + avatar. Div 2 has Alpine-driven green progress bar reading `seedsNavbar` localStorage, level-up animation, and event listeners. Logged out: gear + theme toggle + Log in/Sign up links.
+- `components/_google_logo.html.erb` — shared Google OAuth SVG logo, used by both apps' login/signup/account views
+- `components/_badge.html.erb` — reusable badge with scheme parameter: success, danger, warning, info, violet, primary, orange, emerald, gray, neutral
+- `components/_progress_bar.html.erb` — reusable progress bar with percent, height, color, label, animated locals
 - `theme_settings/edit.html.erb` — combined theme page: color editor (7 pickers + live dark/light preview) at top, styleguide sections below (logos via `theme_logos` config, semantic tokens, typography, buttons, components)
 
 ### Helpers
