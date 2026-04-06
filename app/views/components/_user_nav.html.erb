@@ -13,7 +13,7 @@
     <%# Left column: Div 1 + Div 2 stacked %>
     <div class="flex-1">
       <%# Div 1 (Bigger): balance + icons + username %>
-      <div class="flex items-end gap-1 leading-none" style="background: cornflowerblue;">
+      <div class="flex items-end gap-1 leading-none" :style="$store.devMode && 'background: cornflowerblue'">
         <% if balance_html.present? %>
           <%= raw balance_html %>
         <% end %>
@@ -26,7 +26,7 @@
         <% end %>
       </div>
       <%# Div 2 (Smaller): wallet address / logout %>
-      <div class="text-right" style="background: sandybrown;">
+      <div class="text-right" :style="$store.devMode && 'background: sandybrown'">
         <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
           <div class="text-muted font-mono text-[10px]"><%= current_user.truncated_solana %></div>
         <% end %>
@@ -37,7 +37,7 @@
     </div>
     <%# Div 3 (Avatar): spans both rows %>
     <% account_link = defined?(account_path) ? account_path : "#" %>
-    <%= link_to account_link, class: "hover:opacity-80 transition flex-shrink-0 flex items-center", style: "background: lightgreen;" do %>
+    <%= link_to account_link, class: "hover:opacity-80 transition flex-shrink-0 flex items-center", "x-bind:style": "$store.devMode && 'background: lightgreen'" do %>
       <%= render "components/avatar", user: current_user, size: "nav" %>
     <% end %>
   <% else %>
