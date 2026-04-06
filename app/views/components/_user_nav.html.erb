@@ -18,7 +18,7 @@
       <%= render "components/admin_dropdown" %>
       <%= render "components/theme_toggle" %>
       <%= raw extra_icons_html %>
-      <div class="leading-none text-right ml-auto">
+      <div class="leading-none text-right flex-1">
         <% account_link = defined?(account_path) ? account_path : "#" %>
         <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate block text-right", style: "max-width: 4rem" do %>
           <%= current_user.display_name %>
