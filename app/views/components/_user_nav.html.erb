@@ -8,32 +8,36 @@
 <% extra_icons_html ||= nil %>
 <% show_logout_link ||= false %>
 
-<div class="flex items-end gap-2">
+<div class="flex gap-2">
   <% if logged_in? %>
-    <%# Main area: balance/icons on left, username on right — full width %>
-    <div class="flex items-end flex-1 gap-1 leading-none">
-      <% if balance_html.present? %>
-        <%= raw balance_html %>
-      <% end %>
-      <%= render "components/admin_dropdown" %>
-      <%= render "components/theme_toggle" %>
-      <%= raw extra_icons_html %>
-      <div class="leading-none text-right flex-1">
+    <%# Left column: Div 1 + Div 2 stacked %>
+    <div class="flex-1">
+      <%# Div 1 (Bigger): balance + icons + username %>
+      <div class="flex items-end gap-1 leading-none" style="background: cornflowerblue;">
+        <% if balance_html.present? %>
+          <%= raw balance_html %>
+        <% end %>
+        <%= render "components/admin_dropdown" %>
+        <%= render "components/theme_toggle" %>
+        <%= raw extra_icons_html %>
         <% account_link = defined?(account_path) ? account_path : "#" %>
-        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate block text-right", style: "max-width: 4rem" do %>
+        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right ml-auto", style: "max-width: 4rem" do %>
           <%= current_user.display_name %>
         <% end %>
+      </div>
+      <%# Div 2 (Smaller): wallet address / logout %>
+      <div class="text-right" style="background: sandybrown;">
         <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
-          <div class="text-muted font-mono text-[10px] mt-px"><%= current_user.truncated_solana %></div>
+          <div class="text-muted font-mono text-[10px]"><%= current_user.truncated_solana %></div>
         <% end %>
         <% if show_logout_link %>
           <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
         <% end %>
       </div>
     </div>
-    <%# Avatar %>
+    <%# Div 3 (Avatar): spans both rows %>
     <% account_link = defined?(account_path) ? account_path : "#" %>
-    <%= link_to account_link, class: "hover:opacity-80 transition flex-shrink-0" do %>
+    <%= link_to account_link, class: "hover:opacity-80 transition flex-shrink-0 flex items-center", style: "background: lightgreen;" do %>
       <%= render "components/avatar", user: current_user, size: "sm" %>
     <% end %>
   <% else %>
