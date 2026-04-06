@@ -27,13 +27,18 @@
           <%= current_user.display_name %>
         <% end %>
       </div>
-      <%# Div 2 (Smaller): wallet address / logout %>
-      <div class="text-right" :style="$store.devMode && 'background: sandybrown'">
-        <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
-          <div class="text-muted font-mono text-[10px]"><%= current_user.truncated_solana %></div>
-        <% end %>
-        <% if show_logout_link %>
-          <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
+      <%# Div 2 (Smaller): wallet address (left) + level (right) %>
+      <div class="flex items-center justify-between" :style="$store.devMode && 'background: sandybrown'">
+        <div class="text-muted font-mono text-[10px]">
+          <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
+            <%= current_user.truncated_solana %>
+          <% end %>
+          <% if show_logout_link %>
+            <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
+          <% end %>
+        </div>
+        <% if current_user.respond_to?(:level) && current_user.level.present? %>
+          <div class="text-muted font-mono text-[10px]">Lv.<%= current_user.level %></div>
         <% end %>
       </div>
     </div>
