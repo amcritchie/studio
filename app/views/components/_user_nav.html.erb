@@ -3,10 +3,12 @@
       balance_html     — raw HTML for balance display (e.g. Turf Monster wallet balance)
       extra_icons_html — raw HTML for app-specific icon buttons (e.g. refresh button)
       show_logout_link — boolean, show explicit "Log out" link (Studio uses this)
+      div2_html        — raw HTML to replace default Div 2 (e.g. Turf Monster seeds bar)
 %>
 <% balance_html     ||= nil %>
 <% extra_icons_html ||= nil %>
 <% show_logout_link ||= false %>
+<% div2_html        ||= nil %>
 
 <div class="flex gap-2">
   <% if logged_in? %>
@@ -28,19 +30,23 @@
         <% end %>
       </div>
       <%# Div 2 (Smaller): wallet address (left) + level (right) %>
-      <div class="flex items-center justify-between" :style="$store.devMode && 'background: sandybrown'">
-        <div class="text-muted font-mono text-[10px]">
-          <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
-            <%= current_user.truncated_solana %>
-          <% end %>
-          <% if show_logout_link %>
-            <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
+      <% if div2_html.present? %>
+        <%= raw div2_html %>
+      <% else %>
+        <div class="flex items-center justify-between" :style="$store.devMode && 'background: sandybrown'">
+          <div class="text-muted font-mono text-[10px]">
+            <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
+              <%= current_user.truncated_solana %>
+            <% end %>
+            <% if show_logout_link %>
+              <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
+            <% end %>
+          </div>
+          <% if current_user.respond_to?(:level) && current_user.level.present? %>
+            <div class="text-muted font-mono text-[10px]">Level <%= current_user.level %></div>
           <% end %>
         </div>
-        <% if current_user.respond_to?(:level) && current_user.level.present? %>
-          <div class="text-muted font-mono text-[10px]">Level <%= current_user.level %></div>
-        <% end %>
-      </div>
+      <% end %>
     </div>
     <%# Div 3 (Avatar): spans both rows %>
     <% account_link = defined?(account_path) ? account_path : "#" %>
