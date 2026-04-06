@@ -30,23 +30,38 @@
         <% end %>
       </div>
       <%# Div 2 (Smaller): wallet address (left) + level (right) %>
-      <% if div2_html.present? %>
-        <%= raw div2_html %>
-      <% else %>
-        <div class="flex items-center justify-between" :style="$store.devMode && 'background: sandybrown'">
-          <div class="text-muted font-mono text-[10px]">
+      <div class="relative" style="height: 18px;" :style="$store.devMode && 'background: sandybrown'">
+        <%# Green fill bar %>
+        <div class="absolute inset-y-0 left-0 rounded-sm" style="width: 90%; background: var(--color-cta);"></div>
+        <%# Text layer 1: muted (visible outside bar) %>
+        <div class="absolute inset-0 flex items-center justify-between px-1 text-muted font-mono text-[10px]">
+          <span>
             <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
               <%= current_user.truncated_solana %>
             <% end %>
             <% if show_logout_link %>
               <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
             <% end %>
-          </div>
+          </span>
           <% if current_user.respond_to?(:level) && current_user.level.present? %>
-            <div class="text-muted font-mono text-[10px]">Level <%= current_user.level %></div>
+            <span>Level <%= current_user.level %></span>
           <% end %>
         </div>
-      <% end %>
+        <%# Text layer 2: white (clip-path reveals as bar covers) %>
+        <div class="absolute inset-0 flex items-center justify-between px-1 font-mono text-[10px]" style="color: white; clip-path: inset(0 10% 0 0);">
+          <span>
+            <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
+              <%= current_user.truncated_solana %>
+            <% end %>
+            <% if show_logout_link %>
+              <%= link_to "Log out", logout_path, class: "text-secondary hover:text-heading text-sm font-medium transition" %>
+            <% end %>
+          </span>
+          <% if current_user.respond_to?(:level) && current_user.level.present? %>
+            <span>Level <%= current_user.level %></span>
+          <% end %>
+        </div>
+      </div>
     </div>
     <%# Div 3 (Avatar): spans both rows %>
     <% account_link = defined?(account_path) ? account_path : "#" %>
