@@ -17,13 +17,13 @@
         <% if balance_html.present? %>
           <%= raw balance_html %>
         <% end %>
-        <div class="flex items-end gap-1">
+        <div class="flex items-end gap-1 ml-auto">
           <%= render "components/admin_dropdown" %>
           <%= render "components/theme_toggle" %>
           <%= raw extra_icons_html %>
         </div>
         <% account_link = defined?(account_path) ? account_path : "#" %>
-        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right ml-auto", style: "max-width: 4rem" do %>
+        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right", style: "max-width: 4rem" do %>
           <%= current_user.display_name %>
         <% end %>
       </div>
@@ -38,7 +38,7 @@
           <% end %>
         </div>
         <% if current_user.respond_to?(:level) && current_user.level.present? %>
-          <div class="text-muted font-mono text-[10px]">Lv.<%= current_user.level %></div>
+          <div class="text-muted font-mono text-[10px]">Level <%= current_user.level %></div>
         <% end %>
       </div>
     </div>
