@@ -38,7 +38,7 @@
     <%# Div 3 (Avatar): spans both rows %>
     <% account_link = defined?(account_path) ? account_path : "#" %>
     <%= link_to account_link, class: "hover:opacity-80 transition flex-shrink-0 flex items-center", style: "background: lightgreen;" do %>
-      <%= render "components/avatar", user: current_user, size: "sm" %>
+      <%= render "components/avatar", user: current_user, size: "md" %>
     <% end %>
   <% else %>
     <%= render "components/admin_dropdown" %>
