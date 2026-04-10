@@ -25,7 +25,7 @@
           <%= raw extra_icons_html %>
         </div>
         <% account_link = defined?(account_path) ? account_path : "#" %>
-        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right", style: "max-width: 4rem" do %>
+        <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right" do %>
           <%= current_user.display_name %>
         <% end %>
       </div>
