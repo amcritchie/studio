@@ -23,7 +23,17 @@
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
   document.addEventListener('alpine:init', () => {
-    Alpine.store('theme', localStorage.getItem('theme') || 'dark');
+    Alpine.store('theme', {
+      value: localStorage.getItem('theme') || 'dark',
+      get isDark() { return this.value === 'dark'; },
+      toggle() {
+        document.documentElement.classList.add('theme-transition');
+        document.documentElement.classList.toggle('dark');
+        this.value = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        localStorage.setItem('theme', this.value);
+        setTimeout(() => document.documentElement.classList.remove('theme-transition'), 300);
+      }
+    });
   });
 </script>
 
