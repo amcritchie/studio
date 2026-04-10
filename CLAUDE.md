@@ -25,6 +25,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `OmniauthCallbacksController` — Google OAuth callback + failure (overridden in Turf Monster for merge support)
 - `RegistrationsController` — signup with configurable params via `Studio.registration_params`
 - `ThemeSettingsController` — admin-only theme editor (edit/update/regenerate). Auth via `require_admin_for_theme`.
+- `NavbarController` — admin-only navbar preview page. Route NOT drawn by engine (apps must add `get "admin/navbar", to: "navbar#show"` to their own routes to avoid conflicts).
 
 ### Concern
 - `Studio::ErrorHandling` — `current_user`, `logged_in?`, `require_authentication`, `set_app_session`, `clear_app_session`, `sso_user_available?`, `sso_display_name`, `sso_source_app`, `sso_hub_logo`, `rescue_and_log`, `create_error_log`, `handle_not_found`, `handle_unexpected_error`
@@ -37,16 +38,21 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 ### Views
 - `error_logs/index.html.erb` — Alpine.js search with loading spinner
 - `error_logs/show.html.erb` — backtrace, target/parent with copy-to-clipboard, JSON dump
-- `sessions/new.html.erb` — generic login (apps override with branded versions)
+- `layouts/_navbar.html.erb` — base navbar scaffold with scroll hysteresis, logo, brand title (last word in primary), user nav, mobile sub-navbar. Locals: `preview`, `show_logged_in`, `balance_html`, `extra_icons_html`, `show_logout_link`. Apps override by creating their own `layouts/_navbar.html.erb`.
+- `navbar/show.html.erb` — admin navbar preview page with responsive breakpoint simulation (Tiny/Small/Tablet), scrolled state toggles, username override, logged-in/logged-out views
+- `sessions/new.html.erb` — login with logo (`Studio.logo_for("Auth Logo")`), brand title (last word in primary), SSO blur overlay, Google OAuth. Apps can override.
 - `sessions/_sso_continue.html.erb` — "Continue as" button partial for cross-app awareness
-- `registrations/new.html.erb` — generic signup, conditional name field based on config
+- `registrations/new.html.erb` — signup with logo, brand title, conditional name field, Google OAuth. Apps can override.
 - `components/_theme_toggle.html.erb` — sun/moon toggle button for dark/light mode
-- `components/_admin_dropdown.html.erb` — gear icon dropdown (Alpine.js) with links to Theme (`/admin/theme`) and Error Logs (`/error_logs`). Used in both apps' navbars. Turf Monster overrides locally with app-specific links.
+- `components/_admin_dropdown.html.erb` — gear icon dropdown (Alpine.js) with links to Theme (`/admin/theme`), Navbar (`/admin/navbar`), and Error Logs (`/error_logs`). Used in both apps' navbars. Turf Monster overrides locally with app-specific links.
 - `components/_user_nav.html.erb` — shared right-side navbar user section. Locals: `balance_html`, `extra_icons_html`, `show_logout_link`, `div2_html`. Logged in: two-row layout (Div 1: balance/icons/username, Div 2: seeds progress bar with clip-path text color + wallet address/level or logout link) + avatar. Div 2 has Alpine-driven green progress bar reading `seedsNavbar` localStorage, level-up animation, and event listeners. Logged out: gear + theme toggle + Log in/Sign up links.
 - `components/_google_logo.html.erb` — shared Google OAuth SVG logo, used by both apps' login/signup/account views
 - `components/_badge.html.erb` — reusable badge with scheme parameter: success, danger, warning, info, violet, primary, orange, emerald, gray, neutral
 - `components/_progress_bar.html.erb` — reusable progress bar with percent, height, color, label, animated locals
 - `theme_settings/edit.html.erb` — combined theme page: color editor (7 pickers + live dark/light preview) at top, styleguide sections below (logos via `theme_logos` config, semantic tokens, typography, buttons, components)
+
+### Class Methods
+- `Studio.logo_for(title)` — resolves a logo from `theme_logos` by title. Fallback chain: exact title match → "Navbar Logo" → first logo. Returns path string like `"/logo.png"` or `nil`. Used by navbar (title: "Navbar Logo") and auth views (title: "Auth Logo").
 
 ### Helpers
 - `StudioThemeHelper` — `studio_theme_css_tag` method: loads colors from `ThemeSetting.current` (DB) → falls back to `Studio.theme_config` → runs through `Studio::ThemeResolver` → renders as `<style>` tag. Cached via `Rails.cache` (1-hour TTL).
@@ -230,8 +236,9 @@ To customize an engine view, create the same path in your app:
 ```
 
 Common overrides:
-- `sessions/new.html.erb` — branded login page
-- `registrations/new.html.erb` — branded signup page
+- `layouts/_navbar.html.erb` — app-specific navbar with custom nav links (most apps override this)
+- `sessions/new.html.erb` — branded login page (engine now includes logo + SSO blur by default)
+- `registrations/new.html.erb` — branded signup page (engine now includes logo by default)
 - `sessions/_sso_continue.html.erb` — custom SSO button styling
 - `components/_admin_dropdown.html.erb` — app-specific admin links
 
