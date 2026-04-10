@@ -5,7 +5,8 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - **GitHub**: https://github.com/amcritchie/studio
 - **Gem name**: `studio` (hosted on GitHub, not RubyGems — name "studio" is taken there)
 - **Version**: 0.2.4
-- **Consumed by**: McRitchie Studio (`mcritchie_studio/`) and Turf Monster (`turf_monster/`)
+- **Consumed by**: McRitchie Studio (`mcritchie_studio/`), Turf Monster (`turf_monster/`), and Tax Studio (`tax_studio/`)
+- **Docs**: `docs/` directory — `NAVBAR_SETUP.md`, `GOOGLE_AUTH_SETUP.md`, `ENV_SETUP.md`, `NEW_APP_SETUP.md`
 
 ## Architecture
 
@@ -45,7 +46,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `registrations/new.html.erb` — signup with logo, brand title, conditional name field, Google OAuth. Apps can override.
 - `components/_theme_toggle.html.erb` — sun/moon toggle button for dark/light mode
 - `components/_admin_dropdown.html.erb` — gear icon dropdown (Alpine.js) with links to Theme (`/admin/theme`), Navbar (`/admin/navbar`), and Error Logs (`/error_logs`). Used in both apps' navbars. Turf Monster overrides locally with app-specific links.
-- `components/_user_nav.html.erb` — shared right-side navbar user section. Locals: `balance_html`, `extra_icons_html`, `show_logout_link`, `div2_html`. Logged in: two-row layout (Div 1: balance/icons/username, Div 2: seeds progress bar with clip-path text color + wallet address/level or logout link) + avatar. Div 2 has Alpine-driven green progress bar reading `seedsNavbar` localStorage, level-up animation, and event listeners. Logged out: gear + theme toggle + Log in/Sign up links.
+- `components/_user_nav.html.erb` — shared right-side navbar user section. Locals: `balance_html`, `extra_icons_html`, `show_logout_link`, `div2_html`. Logged in: two-row layout (Div 1: balance/icons/username with `items-center` alignment, Div 2: seeds progress bar with clip-path text color + wallet address/level or logout link) + avatar. Div 2 has Alpine-driven green progress bar reading `seedsNavbar` localStorage, level-up animation, and event listeners. Logged out: gear + theme toggle + Log in/Sign up links. Mobile sub-navbar skips gear+moon when logged in (user_nav already has them).
 - `components/_google_logo.html.erb` — shared Google OAuth SVG logo, used by both apps' login/signup/account views
 - `components/_badge.html.erb` — reusable badge with scheme parameter: success, danger, warning, info, violet, primary, orange, emerald, gray, neutral
 - `components/_progress_bar.html.erb` — reusable progress bar with percent, height, color, label, animated locals
@@ -83,6 +84,8 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 **Tokens defined in shared Tailwind config**: `page`, `surface`, `surface-alt`, `inset` (colors); `heading`, `body`, `secondary`, `muted` (textColor); `subtle`, `strong` (borderColor).
 
 **FOUC prevention**: `_head.html.erb` includes a synchronous `<script>` that sets `class="dark"` from `localStorage.getItem('theme')` before any paint. Alpine theme store initialized on `alpine:init`.
+
+**Theme toggle store**: `Alpine.store('theme')` is an object with `toggle()` method and `isDark` getter (refactored from a plain string). Toggle icons use Heroicons v2 (matching the gear icon set in `_admin_dropdown.html.erb`).
 
 **Views use semantic classes**: `bg-page`, `bg-surface`, `text-heading`, `text-body`, `border-subtle`, etc. Brand colors (`text-violet`, `bg-mint`) are static and don't use tokens.
 
