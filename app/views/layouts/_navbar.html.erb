@@ -1,0 +1,83 @@
+<%# Base navbar partial — apps can override by creating their own app/views/layouts/_navbar.html.erb
+    Locals (all optional):
+      show_logged_in  — override for logged_in? (default: real session)
+      preview         — if true, disables scroll handler and sticky positioning
+      balance_html    — raw HTML for balance display (passed through to _user_nav)
+      extra_icons_html — raw HTML for extra icon buttons (passed through to _user_nav)
+      show_logout_link — boolean, show "Log out" link in user nav (passed through to _user_nav)
+%>
+<% show_user = local_assigns.fetch(:show_logged_in, logged_in?) %>
+<% is_preview = local_assigns.fetch(:preview, false) %>
+<% balance_html = local_assigns.fetch(:balance_html, nil) %>
+<% extra_icons_html = local_assigns.fetch(:extra_icons_html, nil) %>
+<% show_logout_link = local_assigns.fetch(:show_logout_link, false) %>
+<%
+  words = Studio.app_name.split
+  last_word = words.pop
+  prefix = words.join(" ")
+  logo_path = Studio.logo_for("Navbar Logo")
+%>
+
+<header x-data="{ scrolled: false }" <%= '@scroll.window="scrolled = scrolled ? (window.scrollY > 5) : (window.scrollY > 30)"'.html_safe unless is_preview %>
+        class="<%= is_preview ? 'bg-page' : 'sticky top-0 z-50 bg-page transition-shadow duration-300' %>"
+        :class="scrolled && 'shadow-lg border-b border-subtle is-scrolled'">
+  <style>
+    .user-nav-col { width: 14rem; }
+    .nav-title { display: flex; gap: 0.25em; align-items: baseline; }
+    @media (min-width: 400px) { .user-nav-col { width: 15rem; } }
+    @media (min-width: 768px) { .user-nav-col { width: 20rem; } }
+    @media (max-width: 767px) {
+      .nav-title { font-size: 1.25rem !important; flex-direction: column; gap: 0; line-height: 1.15; transition: font-size 0.3s; }
+      .nav-title span:first-child { margin-bottom: -4px; }
+      .nav-title span:last-child { font-size: 1.5rem; transition: font-size 0.3s; }
+      .nav-logo-link { gap: 0.5rem !important; }
+      .is-scrolled .nav-title { font-size: 1rem !important; }
+      .is-scrolled .nav-title span:last-child { font-size: 1.15rem !important; }
+      .is-scrolled .nav-logo { width: 2.5rem !important; height: 2.5rem !important; }
+    }
+    @media (max-width: 399px) {
+      .nav-logo-link { gap: 0.25rem !important; }
+      .nav-title { font-size: 1.1rem !important; transition: font-size 0.3s; }
+      .nav-title span:last-child { font-size: 1.3rem; transition: font-size 0.3s; }
+      .is-scrolled .nav-title { font-size: 0.9rem !important; }
+      .is-scrolled .nav-title span:last-child { font-size: 1rem !important; }
+    }
+  </style>
+  <div class="flex items-center <%= is_preview ? 'py-6' : 'transition-all duration-300' %>"
+       <%= ":class=\"scrolled ? 'py-2' : 'py-6'\"".html_safe unless is_preview %>>
+    <%# Left side: logo + nav %>
+    <div class="flex-1 px-4">
+      <div class="flex items-center gap-6">
+        <%= link_to root_path, class: "nav-logo-link inline-flex items-center gap-3 group" do %>
+          <% if logo_path %>
+            <img src="<%= logo_path %>" alt="<%= Studio.app_name %>" class="nav-logo rounded-full shadow-lg <%= is_preview ? 'w-12 h-12' : 'group-hover:scale-105 transition-all duration-300' %>"
+                 <%= "x-bind:class=\"scrolled ? 'w-8 h-8' : 'w-12 h-12'\"".html_safe unless is_preview %>>
+          <% end %>
+          <h1 class="nav-title font-extrabold text-heading tracking-tight <%= is_preview ? 'text-3xl' : 'transition-all duration-300' %>"
+              <%= "x-bind:class=\"scrolled ? 'text-xl' : 'text-3xl'\"".html_safe unless is_preview %>><span><%= prefix %></span><span class="text-primary"><%= last_word %></span></h1>
+        <% end %>
+        <%# Desktop nav — apps should override this partial to add links here %>
+        <nav class="hidden md:flex items-center gap-4">
+        </nav>
+      </div>
+    </div>
+    <%# Right side: user nav (matches sidebar width) %>
+    <div class="user-nav-col flex-shrink-0 pl-0 pr-4 md:px-4">
+      <% if show_user %>
+        <%= render "components/user_nav", balance_html: balance_html, extra_icons_html: extra_icons_html, show_logout_link: show_logout_link %>
+      <% else %>
+        <div class="flex items-center justify-end gap-3">
+          <span class="hidden md:flex"><%= render "components/theme_toggle" %></span>
+          <%= link_to "Log in", login_path, class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <%# Mobile sub-navbar: compact row hidden on desktop — apps should override to add links %>
+  <div class="flex md:hidden items-center gap-3 px-4 py-1.5 overflow-x-auto border-t border-subtle bg-surface-alt">
+    <span class="ml-auto flex items-center gap-3">
+      <%= render "components/admin_dropdown" %>
+      <%= render "components/theme_toggle" %>
+    </span>
+  </div>
+</header>

@@ -39,6 +39,18 @@ module Studio
     }.compact
   end
 
+  # Find a logo from theme_logos by title, with fallback chain:
+  # 1. Exact title match
+  # 2. "Navbar Logo" fallback
+  # 3. First logo in the list
+  def self.logo_for(title)
+    logos = theme_logos.map { |l| l.is_a?(Hash) ? l : { file: l, title: l } }
+    entry = logos.find { |l| l[:title] == title }
+    entry ||= logos.find { |l| l[:title] == "Navbar Logo" }
+    entry ||= logos.first
+    entry ? "/#{entry[:file]}" : nil
+  end
+
   def self.routes(router)
     router.instance_exec do
       get  "login",  to: "sessions#new"
@@ -57,6 +69,7 @@ module Studio
       patch "admin/theme",            to: "theme_settings#update",     as: :admin_theme_update
       post  "admin/theme/regenerate", to: "theme_settings#regenerate", as: :admin_theme_regenerate
       get   "admin/schema",           to: "schema#index",              as: :admin_schema
+      get   "admin/navbar",           to: "navbar#show",               as: :admin_navbar
     end
   end
 end
