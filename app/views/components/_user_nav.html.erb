@@ -15,7 +15,7 @@
     <%# Left column: Div 1 + Div 2 stacked %>
     <div class="flex-1">
       <%# Div 1 (Bigger): balance + icons + username %>
-      <div class="flex items-end gap-1 leading-none" :style="'padding: 0 6px;' + ($store.devMode ? 'background: cornflowerblue;' : '')">
+      <div class="flex items-center gap-1 leading-none" :style="'padding: 0 6px;' + ($store.devMode ? 'background: cornflowerblue;' : '')">
         <% if balance_html.present? %>
           <%= raw balance_html %>
         <% end %>
