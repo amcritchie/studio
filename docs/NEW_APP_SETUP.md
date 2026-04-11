@@ -282,7 +282,18 @@ end
     <%= render "layouts/studio/head" %>
   </head>
 
-  <body x-data class="bg-page text-body min-h-screen">
+  <body x-data class="bg-page text-body min-h-screen" :class="{ 'dev-mode': $store.devMode }">
+    <%% unless Rails.env.production? %>
+      <div style="background:#eab308; color:#000; font-size:12px; font-weight:700; padding:2px 0; text-align:center; position:relative;">
+        <%%= Rails.env.capitalize %> Environment
+        <span style="position:absolute; right:8px; top:50%; transform:translateY(-50%);">
+          <button @click="$store.devMode = !$store.devMode; localStorage.setItem('devMode', $store.devMode)"
+                  class="rounded cursor-pointer"
+                  style="font-size:10px; font-weight:700; padding:1px 6px;"
+                  :style="$store.devMode ? 'background:rgba(0,0,0,0.4); color:#fff;' : 'background:rgba(0,0,0,0.2); color:#000;'">DEV MODE</button>
+        </span>
+      </div>
+    <%% end %>
     <%= render "layouts/navbar" %>
 
     <div class="max-w-7xl mx-auto px-4 py-6">
@@ -292,6 +303,8 @@ end
   </body>
 </html>
 ```
+
+**Dev banner**: Yellow bar hidden in production, shows environment name + DEV MODE toggle. Uses inline styles (not Tailwind classes) to avoid compilation issues across apps. The `devMode` Alpine store is initialized by the engine's `_head.html.erb`. The `dev-mode` body class can be used for dev-only UI toggles.
 
 ### `app/views/layouts/_navbar.html.erb`
 
@@ -361,6 +374,7 @@ bin/rails server -p {PORT}
 ```
 
 - [ ] Homepage loads with navbar, logo, brand title
+- [ ] Dev banner shows yellow "Development Environment" bar with DEV MODE toggle
 - [ ] Dark/light mode toggle works
 - [ ] `/login` shows logo + SSO + email/password + Google
 - [ ] `/signup` shows logo + form + Google
