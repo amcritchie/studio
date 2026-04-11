@@ -1,10 +1,11 @@
 <% unless Rails.env.production? %>
-  <div class="bg-yellow-500 text-black text-xs font-bold py-0.5 flex items-center justify-center relative">
+  <div class="flex items-center justify-center relative" style="background:#eab308; color:#000; font-size:12px; font-weight:700; padding:2px 0;">
     <span><%= Rails.env.capitalize %> Environment</span>
-    <span class="absolute right-2 flex items-center gap-1.5">
+    <span class="absolute flex items-center" style="right:8px; gap:6px;">
       <button @click="$store.devMode = !$store.devMode; localStorage.setItem('devMode', $store.devMode)"
-              class="px-1.5 rounded text-[10px] font-bold transition cursor-pointer"
-              :class="$store.devMode ? 'bg-black/40 text-white' : 'bg-black/20 text-black'">DEV MODE</button>
+              class="rounded transition cursor-pointer"
+              style="font-size:10px; font-weight:700; padding:1px 6px;"
+              :style="$store.devMode ? 'background:rgba(0,0,0,0.4); color:#fff;' : 'background:rgba(0,0,0,0.2); color:#000;'">DEV MODE</button>
       <%= yield if block_given? %>
     </span>
   </div>
