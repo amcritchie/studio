@@ -87,7 +87,7 @@ module Studio
 
     def require_authentication
       unless logged_in?
-        redirect_to login_path, alert: "Please log in to continue."
+        redirect_to login_path
       end
     end
 
