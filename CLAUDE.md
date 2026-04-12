@@ -37,6 +37,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 - `Sluggable` concern — `before_save :set_slug`, `to_param` returns slug
 
 ### Views
+- `layouts/studio/_flash.html.erb` — **toast notification system**. Self-contained partial (CSS + HTML + `toastManager` Alpine component). Supports notice/alert types, custom titles, images, action buttons, blur shadow glow, stacking with peek strips, configurable duration. Must be first child of `<body>` for `backdrop-filter: blur()`. Server-side flash auto-converts to toasts. JS API: `dispatchEvent(new CustomEvent('toast', { detail: { type, title, message, image, dismissible, buttons, duration, blurShadow } }))`. Note: `components/_flash.html.erb` (old horizontal bars) still exists but is no longer referenced.
 - `error_logs/index.html.erb` — Alpine.js search with loading spinner
 - `error_logs/show.html.erb` — backtrace, target/parent with copy-to-clipboard, JSON dump
 - `layouts/_navbar.html.erb` — base navbar scaffold with scroll hysteresis, logo, brand title (last word in primary), user nav, mobile sub-navbar. Locals: `preview`, `show_logged_in`, `balance_html`, `extra_icons_html`, `show_logout_link`. Apps override by creating their own `layouts/_navbar.html.erb`.
