@@ -81,7 +81,7 @@
         <%# Fill bar %>
         <div class="absolute inset-y-0 left-0 rounded z-0" style="background: var(--color-cta); transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);" :style="{ width: barWidth + '%' }"></div>
         <%# Text layer 1: muted (visible outside bar) %>
-        <div class="absolute inset-0 flex items-center justify-between px-1.5 font-mono text-muted z-[1]" style="font-size: 10px;">
+        <div class="absolute inset-0 flex items-center justify-between px-1.5 font-mono text-muted z-[1] nav-bar-text">
           <span>
             <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
               <%= current_user.truncated_solana %>
@@ -90,11 +90,11 @@
           <% if server_level %>
             <span :class="leveledUp && 'nav-level-pop'" x-text="'Level ' + displayLevel">Level <%= server_level %></span>
           <% elsif show_logout_link %>
-            <%= link_to "Log out", logout_path, class: "font-mono text-muted no-underline", style: "font-size: 10px;" %>
+            <%= link_to "Log out", logout_path, class: "font-mono text-muted no-underline nav-bar-text" %>
           <% end %>
         </div>
         <%# Text layer 2: white (clip-path reveals where bar covers) %>
-        <div class="absolute inset-0 flex items-center justify-between px-1.5 font-mono text-white z-[2]" style="font-size: 10px;" :style="{ 'clip-path': 'inset(0 ' + (100 - barWidth) + '% 0 0)' }">
+        <div class="absolute inset-0 flex items-center justify-between px-1.5 font-mono text-white z-[2] nav-bar-text" :style="{ 'clip-path': 'inset(0 ' + (100 - barWidth) + '% 0 0)' }">
           <span>
             <% if current_user.respond_to?(:truncated_solana) && current_user.try(:solana_connected?) %>
               <%= current_user.truncated_solana %>
@@ -103,7 +103,7 @@
           <% if server_level %>
             <span :class="leveledUp && 'nav-level-pop'" x-text="'Level ' + displayLevel">Level <%= server_level %></span>
           <% elsif show_logout_link %>
-            <%= link_to "Log out", logout_path, class: "font-mono text-white no-underline", style: "font-size: 10px;" %>
+            <%= link_to "Log out", logout_path, class: "font-mono text-white no-underline nav-bar-text" %>
           <% end %>
         </div>
       </div>
@@ -117,6 +117,7 @@
           100% { transform: scale(1); }
         }
         .nav-level-pop { animation: navLevelPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .nav-bar-text { font-size: 10px; }
       </style>
     </div>
     <%# Div 3 (Avatar): spans both rows %>
