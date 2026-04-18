@@ -20,9 +20,9 @@
           <%= raw balance_html %>
         <% end %>
         <div class="flex items-center gap-2 ml-auto self-end">
-          <%= render "components/admin_dropdown" %>
-          <%= render "components/theme_toggle" %>
           <%= raw extra_icons_html %>
+          <%= render "components/admin_dropdown" %>
+          <%= render "components/theme_toggle_morph" %>
         </div>
         <% account_link = defined?(account_path) ? account_path : "#" %>
         <%= link_to account_link, class: "text-heading font-semibold hover:text-primary transition text-base leading-none truncate text-right" do %>
@@ -127,7 +127,7 @@
     <% end %>
   <% else %>
     <%= render "components/admin_dropdown" %>
-    <%= render "components/theme_toggle" %>
+    <%= render "components/theme_toggle_morph" %>
     <div class="flex items-center gap-3 ml-auto">
       <%= link_to "Log in", login_path, class: "text-heading hover:text-primary text-sm font-semibold transition" %>
       <%= link_to "Sign up", signup_path, class: "btn btn-primary btn-sm" %>

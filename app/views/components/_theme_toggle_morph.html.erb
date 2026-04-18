@@ -1,0 +1,15 @@
+<%# Theme toggle with scale-morph spinner swap.
+    showNavSpinner() / hideNavSpinner() (defined in _head.html.erb) cross-fade between
+    the theme toggle and a loading spinner with a scale+rotate animation.
+%>
+<span class="relative flex" style="width: 16px; height: 16px;">
+  <span class="nav-toggle-icon absolute inset-0 transition-all duration-300" style="transform: scale(1) rotate(0deg); opacity: 1;">
+    <%= render "components/theme_toggle" %>
+  </span>
+  <span class="nav-spinner-icon absolute inset-0 transition-all duration-300 pointer-events-none" style="transform: scale(0) rotate(-90deg); opacity: 0;">
+    <svg class="w-4 h-4 animate-spin text-secondary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+    </svg>
+  </span>
+</span>

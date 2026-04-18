@@ -22,6 +22,25 @@
 
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script>
+  // Nav spinner — scale morph between theme toggle and loading spinner
+  // Minimum display time prevents quick flashes
+  window._navSpinnerShownAt = 0;
+  window._navSpinnerMinMs = 2500;
+  window.showNavSpinner = function() {
+    window._navSpinnerShownAt = Date.now();
+    document.querySelectorAll('.nav-toggle-icon').forEach(function(e) { e.style.opacity = '0'; e.style.transform = 'scale(0) rotate(90deg)'; });
+    document.querySelectorAll('.nav-spinner-icon').forEach(function(e) { e.style.opacity = '1'; e.style.transform = 'scale(1) rotate(0deg)'; });
+  };
+  window.hideNavSpinner = function() {
+    var elapsed = Date.now() - window._navSpinnerShownAt;
+    var remaining = Math.max(0, window._navSpinnerMinMs - elapsed);
+    setTimeout(function() {
+      document.querySelectorAll('.nav-toggle-icon').forEach(function(e) { e.style.opacity = '1'; e.style.transform = 'scale(1) rotate(0deg)'; });
+      document.querySelectorAll('.nav-spinner-icon').forEach(function(e) { e.style.opacity = '0'; e.style.transform = 'scale(0) rotate(-90deg)'; });
+    }, remaining);
+  };
+</script>
+<script>
   document.addEventListener('alpine:init', () => {
     Alpine.store('devMode', localStorage.getItem('devMode') === 'true');
     Alpine.store('theme', {
