@@ -1,7 +1,8 @@
 <%# locals: (text:, display: nil) %>
 <div class="flex items-center gap-2" x-data="{ copied: false }">
   <code class="bg-inset rounded px-2 py-1 text-primary font-mono text-xs"><%= display || text %></code>
-  <button @click="navigator.clipboard.writeText('<%= j text %>'); copied = true; setTimeout(() => copied = false, 2000)"
+  <button data-copy-text="<%= text %>"
+          @click="navigator.clipboard.writeText($el.dataset.copyText); copied = true; setTimeout(() => copied = false, 2000)"
           class="text-muted hover:text-heading transition text-xs" :class="copied && 'text-mint'">
     <span x-show="!copied">Copy</span>
     <span x-show="copied" x-cloak>Copied</span>

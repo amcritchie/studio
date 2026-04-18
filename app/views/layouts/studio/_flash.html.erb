@@ -176,6 +176,10 @@
             buttons: buttons,
             visible: false
           });
+          // Cap at 5 toasts — dismiss oldest when exceeded
+          while (this.toasts.length > 5) {
+            this.toasts.pop();
+          }
           this.expanded = false;
           this.$nextTick(() => {
             var t = this.toasts.find(function(t) { return t.id === id; });

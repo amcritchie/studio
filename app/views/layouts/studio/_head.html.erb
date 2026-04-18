@@ -39,6 +39,11 @@
       document.querySelectorAll('.nav-spinner-icon').forEach(function(e) { e.style.opacity = '0'; e.style.transform = 'scale(0) rotate(-90deg)'; });
     }, remaining);
   };
+  // Reset spinner state before Turbo caches the page
+  document.addEventListener('turbo:before-cache', function() {
+    document.querySelectorAll('.nav-toggle-icon').forEach(function(e) { e.style.opacity = '1'; e.style.transform = 'scale(1) rotate(0deg)'; });
+    document.querySelectorAll('.nav-spinner-icon').forEach(function(e) { e.style.opacity = '0'; e.style.transform = 'scale(0) rotate(-90deg)'; });
+  });
 </script>
 <script>
   document.addEventListener('alpine:init', () => {
