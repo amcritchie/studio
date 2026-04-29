@@ -3,6 +3,7 @@ require "studio/engine"
 require "studio/color_scale"
 require "studio/theme_resolver"
 require "studio/username_generator"
+require "studio/s3"
 
 module Studio
   mattr_accessor :app_name,            default: "Studio"
@@ -22,6 +23,11 @@ module Studio
   mattr_accessor :theme_warning,  default: "#FF7C47"
   mattr_accessor :theme_danger,   default: "#EF4444"
   mattr_accessor :theme_accent,   default: "#F72585"
+
+  # S3 / object storage — default bucket prefix is the shared "mcritchie-studio"
+  # bucket. Apps with their own bucket override this in config/initializers/studio.rb.
+  mattr_accessor :s3_bucket_prefix, default: "mcritchie-studio"
+  mattr_accessor :s3_region,        default: "us-east-2"
 
   def self.configure
     yield self

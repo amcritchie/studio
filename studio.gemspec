@@ -13,4 +13,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "tailwindcss-rails", "~> 2.7"
   spec.add_dependency "faker", ">= 2.0"
   spec.add_dependency "solid_queue"
+  spec.add_dependency "aws-sdk-s3", "~> 1.218"
 end
