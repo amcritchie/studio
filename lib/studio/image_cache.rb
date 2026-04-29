@@ -1,37 +1,50 @@
 module Studio
   module ImageCache
-    # Downloads source_url, resizes to each width via MiniMagick, uploads each
-    # variant to S3, and persists an ::ImageCache row per variant.
-    #
-    # Idempotent: variants already cached for this owner/purpose are skipped.
-    # If every requested variant exists, the source is never downloaded.
-    #
-    # key_base is the path the original WOULD live at; the variant suffix is
-    # appended before the extension. e.g. "foo/bar.png" + width 400 ->
-    # "foo/bar-400.png".
-    def self.cache!(owner:, purpose:, source_url:, key_base:, widths:, content_type: "image/png")
-      existing = ::ImageCache.where(owner: owner, purpose: purpose).index_by(&:variant)
-      missing  = widths.map(&:to_s).reject { |w| existing.key?(w) }
+    EXT_BY_TYPE = {
+      "image/png"  => "png",
+      "image/jpeg" => "jpg",
+      "image/jpg"  => "jpg",
+      "image/webp" => "webp",
+      "image/gif"  => "gif"
+    }.freeze
 
+    # Caches an image at S3 under a folder per owner. Every call stores the
+    # unmodified source as variant "original", plus one resized variant per
+    # entry in widths.
+    #
+    # Layout:
+    #   {key_prefix}/original.{ext}
+    #   {key_prefix}/{width}.{ext}
+    #
+    # Idempotent: variants already present in ImageCache are skipped. If
+    # nothing is missing, the source is never downloaded.
+    def self.cache!(owner:, purpose:, source_url:, key_prefix:, widths:, content_type: "image/png")
+      ext = EXT_BY_TYPE[content_type] || "bin"
+      requested = ["original", *widths.map(&:to_s)]
+
+      existing = ::ImageCache.where(owner: owner, purpose: purpose).index_by(&:variant)
+      missing  = requested - existing.keys
       return existing if missing.empty?
 
       require "open-uri"
       require "mini_magick"
 
       body = URI.open(source_url, read_timeout: 30).read
-      ext  = File.extname(key_base)
-      base = key_base.sub(/#{Regexp.escape(ext)}\z/, "")
 
       missing.each do |variant|
-        img = MiniMagick::Image.read(body)
-        img.resize "#{variant}x"
-        resized = img.to_blob
-
-        s3_key = "#{base}-#{variant}#{ext}"
+        if variant == "original"
+          payload = body
+          s3_key  = "#{key_prefix}/original.#{ext}"
+        else
+          img = MiniMagick::Image.read(body)
+          img.resize "#{variant}x"
+          payload = img.to_blob
+          s3_key  = "#{key_prefix}/#{variant}.#{ext}"
+        end
 
         Studio::S3.upload(
           key: s3_key,
-          body: resized,
+          body: payload,
           content_type: content_type,
           cache_control: "public, max-age=31536000, immutable"
         )
@@ -42,7 +55,7 @@ module Studio
           variant: variant,
           s3_key: s3_key,
           source_url: source_url,
-          bytes: resized.bytesize,
+          bytes: payload.bytesize,
           content_type: content_type
         )
       end
