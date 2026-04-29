@@ -4,6 +4,7 @@ require "studio/color_scale"
 require "studio/theme_resolver"
 require "studio/username_generator"
 require "studio/s3"
+require "studio/image_cache"
 
 module Studio
   mattr_accessor :app_name,            default: "Studio"
