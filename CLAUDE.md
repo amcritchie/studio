@@ -34,6 +34,7 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 ### Models
 - `ErrorLog` — polymorphic target/parent, `capture!(exception)`, cleaned backtrace
 - `ThemeSetting` — single-row-per-app (keyed by `app_name`), 7 nullable color columns (DB: `accent1`/`accent2`, mapped to roles `success`/`accent` via `db_column_for`), `resolved_colors` merges DB + config defaults
+- `ImageCache` — polymorphic owner, columns: `purpose`, `variant`, `s3_key`, `source_url`, `bytes`, `content_type`. Unique on `(owner_type, owner_id, purpose, variant)` and on `s3_key`. `#url` → `Studio::S3.url(key: s3_key)`. Per-app `image_caches` table (same pattern as `error_logs`).
 - `Sluggable` concern — `before_save :set_slug`, `to_param` returns slug
 
 ### Views
@@ -62,6 +63,8 @@ Shared Rails engine gem for McRitchie apps. Provides auth, error handling, and c
 ### Lib Modules
 - `Studio::ColorScale` — pure Ruby hex color math: `generate(hex)` returns 50-900 shade scale, `lighten`, `darken`, `hex_to_rgb`, `rgb_to_hex`, `with_opacity`
 - `Studio::ThemeResolver` — takes 7 role colors, derives all ~22 CSS custom properties + primary palette (50-900 shades + RGB variants) for dark and light modes. `to_css` returns the full `:root, .dark { ... } html:not(.dark) { ... }` CSS string.
+- `Studio::S3` — thin `aws-sdk-s3` wrapper. Bucket auto-resolves to `"#{Studio.s3_bucket_prefix}-#{Rails.env.production? ? "production" : "dev"}"`. Default prefix `"mcritchie-studio"`, default region `"us-east-2"`. API: `upload`, `download`, `url`, `signed_url`, `exists?`, `delete`, `list`, `bucket`. Lazy-loads `aws-sdk-s3`.
+- `Studio::ImageCache` — `cache!(owner:, purpose:, source_url:, key_prefix:, widths:, content_type:)`. Downloads source once, generates resized variants via MiniMagick, uploads each to S3, persists `ImageCache` rows. Always stores the unmodified source as variant `"original"` alongside requested widths. Idempotent — variants already in `ImageCache` are skipped. Layout: `{key_prefix}/original.{ext}`, `{key_prefix}/{width}.{ext}`. Requires system ImageMagick (`brew install imagemagick`).
 
 ### Dynamic Theme System
 
