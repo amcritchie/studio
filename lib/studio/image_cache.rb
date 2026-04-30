@@ -16,9 +16,15 @@ module Studio
     #   {key_prefix}/original.{ext}
     #   {key_prefix}/{width}.{ext}
     #
+    # Source: provide EITHER source_url (HTTP fetch) OR source_path (local
+    # file). source_url is recorded on each ImageCache row regardless — for
+    # source_path callers, pass the original URL too if you want it tracked.
+    #
     # Idempotent: variants already present in ImageCache are skipped. If
-    # nothing is missing, the source is never downloaded.
-    def self.cache!(owner:, purpose:, source_url:, key_prefix:, widths:, content_type: "image/png")
+    # nothing is missing, the source is never read.
+    def self.cache!(owner:, purpose:, key_prefix:, widths:, source_url: nil, source_path: nil, content_type: "image/png")
+      raise ArgumentError, "either source_url or source_path is required" if source_url.nil? && source_path.nil?
+
       ext = EXT_BY_TYPE[content_type] || "bin"
       requested = ["original", *widths.map(&:to_s)]
 
@@ -26,10 +32,14 @@ module Studio
       missing  = requested - existing.keys
       return existing if missing.empty?
 
-      require "open-uri"
       require "mini_magick"
 
-      body = URI.open(source_url, read_timeout: 30).read
+      body = if source_path
+        File.binread(source_path)
+      else
+        require "open-uri"
+        URI.open(source_url, read_timeout: 30).read
+      end
 
       missing.each do |variant|
         if variant == "original"
